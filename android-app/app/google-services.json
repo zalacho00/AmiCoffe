@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "867398542261",
+    "project_id": "amicoffe-25ec1",
+    "storage_bucket": "amicoffe-25ec1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:867398542261:android:fbf64b3c171a716dbdeffc",
+        "android_client_info": {
+          "package_name": "com.example.amicoffe_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfUPDl7ybMUSHwr5ZhbMx4-ogdIwPvfs8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
