@@ -1,32 +1,123 @@
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const admin = require("firebase-admin");
+
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+const db = admin.firestore();
+
 /**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * HU-07: Cloud Function Callable para actualizar el inventario en tiempo real
+ * Protegida por custom claim 'administrador'
  */
+exports.actualizarStock = onCall(async (request) => {
+  // 1. Verificación de autenticación y Custom Claim 'administrador'
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "Debe iniciar sesión para realizar esta operación."
+    );
+  }
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+  const token = request.auth.token;
+  if (!token.administrador && token.role !== "admin") {
+    throw new HttpsError(
+      "permission-denied",
+      "Se requieren permisos de Administrador para modificar el inventario."
+    );
+  }
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+  const { productoId, nuevoStock, tipoCambio = "ajuste_manual" } = request.data;
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+  // Validaciones básicas de entrada
+  if (!productoId || typeof productoId !== "string") {
+    throw new HttpsError(
+      "invalid-argument",
+      "El parámetro 'productoId' es obligatorio."
+    );
+  }
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+  if (typeof nuevoStock !== "number" || isNaN(nuevoStock)) {
+    throw new HttpsError(
+      "invalid-argument",
+      "El parámetro 'nuevoStock' debe ser un número válido."
+    );
+  }
+
+  // 🟢 Criterio de Aceptación 3: Si el nuevo stock es negativo, rechaza la operación antes de escribir nada.
+  if (nuevoStock < 0) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Operación rechazada: El stock no puede ser negativo."
+    );
+  }
+
+  const productoRef = db.collection("productos").doc(productoId);
+  const auditoriaRef = db.collection("auditoria_inventario").doc();
+
+  try {
+    // 🟢 Criterio de Aceptación 2: Ejecución atómica en una runTransaction
+    const resultado = await db.runTransaction(async (transaction) => {
+      const productoDoc = await transaction.get(productoRef);
+
+      if (!productoDoc.exists) {
+        throw new HttpsError(
+          "not-found",
+          `El producto con ID '${productoId}' no existe.`
+        );
+      }
+
+      const productoData = productoDoc.data();
+      const stockAnterior = productoData.stock ?? 0;
+
+      // Recalcular estado y visibilidad en la misma escritura
+      let nuevoEstado = "Disponible";
+      let disponible = true;
+
+      if (nuevoStock === 0) {
+        nuevoEstado = "Agotado";
+        disponible = false; // Se oculta automáticamente en la app cliente vía query/onSnapshot
+      } else if (nuevoStock <= 15) {
+        nuevoEstado = "Bajo Stock";
+        disponible = true;
+      }
+
+      // Actualizar documento de producto
+      transaction.update(productoRef, {
+        stock: nuevoStock,
+        estado: nuevoEstado,
+        disponible: disponible,
+        actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Crear documento en auditoria_inventario
+      transaction.set(auditoriaRef, {
+        producto_id: productoId,
+        nombre_producto: productoData.nombre || productoId,
+        tipo_cambio: tipoCambio,
+        stock_anterior: stockAnterior,
+        stock_nuevo: nuevoStock,
+        administrador: token.email || token.uid || "admin",
+        fecha: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return { stockAnterior, stockNuevo: nuevoStock, nuevoEstado, disponible };
+    });
+
+    return {
+      success: true,
+      mensaje: "Inventario y auditoría actualizados correctamente.",
+      data: resultado,
+    };
+  } catch (error) {
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+    console.error("Error en actualizarStock transaction:", error);
+    throw new HttpsError(
+      "internal",
+      `Error al procesar la actualización de inventario: ${error.message}`
+    );
+  }
+});
