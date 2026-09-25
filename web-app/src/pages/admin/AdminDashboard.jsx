@@ -4,8 +4,10 @@ import AdminInventario from './AdminInventario';
 import AdminCupos from './AdminCupos';
 import AuthModal from './AuthModal';
 import './AdminDashboard.css';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../../firebase/config';
 
-const SESSION_KEY = 'amicoffee_admin_session';
+
 
 /* ── SVG Icon Components (Lucide-style) ── */
 const IconBox = () => (
@@ -64,26 +66,30 @@ const IconMapPin = () => (
 /* ──────────────────────────── */
 
 export default function AdminDashboard() {
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem(SESSION_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [activeTab, setActiveTab] = useState('inventario');
 
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem(SESSION_KEY);
-    }
-  }, [currentUser]);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const tokenResult = await user.getIdTokenResult();
+        const role = tokenResult.claims.role;
+        if (role === 'administrador') {
+          setCurrentUser({ name: user.email.split('@')[0], email: user.email, role });
+        } else {
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+      setCheckingAuth(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem(SESSION_KEY);
+  const handleLogout = async () => {
+    await signOut(auth);
     setCurrentUser(null);
   };
 
@@ -98,6 +104,10 @@ export default function AdminDashboard() {
     metricas: 'Panel de Métricas — Resumen General',
     cupos: 'Control de Cupos y Tiempos de Espera',
   };
+
+  if (checkingAuth) {
+    return <div className="admin-root">Cargando…</div>;
+  }
 
   return (
     <div className="admin-root">
@@ -168,11 +178,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="topbar-actions">
-              {!currentUser && (
-                <button className="btn-primary" onClick={() => setCurrentUser({ name: 'Admin Funlam', role: 'admin' })}>
-                  Ingresar
-                </button>
-              )}
+              
             </div>
           </header>
 

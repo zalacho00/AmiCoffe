@@ -1,43 +1,56 @@
 import React, { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase/config';
 import './AuthModal.css';
 
 export default function AuthModal({ onLoginSuccess }) {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState('admin');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (!email || !password || (!isLogin && !name)) {
-      setError('Por favor completa todos los campos requeridos');
+
+    if (!email || !password) {
+      setError('Por favor completa todos los campos');
       return;
     }
 
     setIsLoading(true);
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const tokenResult = await credential.user.getIdTokenResult();
+      const role = tokenResult.claims.role; // "administrador" | "cocina" | undefined
 
-    // Simulación de respuesta rápida para frontend (listo para conectar con Firebase Auth / Backend)
-    setTimeout(() => {
+      if (role !== 'administrador') {
+        setError('Esta cuenta no tiene permisos de administrador.');
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      onLoginSuccess({
+        name: credential.user.email.split('@')[0],
+        email: credential.user.email,
+        role,
+      });
+    } catch (err) {
+      console.error(err);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Correo o contraseña incorrectos.');
+      } else {
+        setError('Error al iniciar sesión. Intenta de nuevo.');
+      }
+    } finally {
       setIsLoading(false);
-      const mockUser = {
-        name: isLogin ? (email.split('@')[0] || 'Administrador') : name,
-        email,
-        role: role,
-        avatar: '☕'
-      };
-      onLoginSuccess(mockUser);
-    }, 600);
+    }
   };
 
   return (
     <div className="auth-overlay">
       <div className="auth-card">
-        {/* Banner Decorativo con Vibes AmiCoffee */}
         <div className="auth-header">
           <div className="auth-logo-badge">
             <img src="/amicoffe-logo.png" alt="AmiCoffe Logo" width="44" height="44" style={{ borderRadius: '50%', objectFit: 'contain' }} />
@@ -47,37 +60,9 @@ export default function AuthModal({ onLoginSuccess }) {
         </div>
 
         <div className="auth-body">
-          <div className="auth-tabs">
-            <button 
-              className={`auth-tab ${isLogin ? 'active' : ''}`}
-              onClick={() => { setIsLogin(true); setError(''); }}
-            >
-              Iniciar Sesión
-            </button>
-            <button 
-              className={`auth-tab ${!isLogin ? 'active' : ''}`}
-              onClick={() => { setIsLogin(false); setError(''); }}
-            >
-              Nuevo Admin
-            </button>
-          </div>
-
           {error && <div className="auth-error-alert">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
-            {!isLogin && (
-              <div className="form-group">
-                <label htmlFor="name">Nombre Completo</label>
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Ej. Admin Camilo"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-            )}
-
             <div className="form-group">
               <label htmlFor="email">Correo Institucional / Admin</label>
               <input
@@ -102,23 +87,12 @@ export default function AuthModal({ onLoginSuccess }) {
               />
             </div>
 
-            {!isLogin && (
-              <div className="form-group">
-                <label htmlFor="role">Rol en Sistema</label>
-                <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                  <option value="admin">Administrador General</option>
-                  <option value="barista_lead">Líder Barista / KDS</option>
-                  <option value="inventario">Encargado de Inventario</option>
-                </select>
-              </div>
-            )}
-
             <button type="submit" className="auth-submit-btn" disabled={isLoading}>
               {isLoading ? (
                 <span className="spinner">⏳ Conectando...</span>
               ) : (
                 <>
-                  {isLogin ? 'Ingresar al Dashboard' : 'Crear Cuenta Admin'}
+                  Ingresar al Dashboard
                   <span className="btn-arrow">→</span>
                 </>
               )}
