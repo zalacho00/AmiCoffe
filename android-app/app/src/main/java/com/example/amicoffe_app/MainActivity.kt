@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.amicoffe_app.ui.screens.menu.AmiCoffeMainScreen
+import com.example.amicoffe_app.navigation.AppNavigation
 import com.example.amicoffe_app.ui.theme.AmiCoffeappTheme
 import com.example.amicoffe_app.ui.theme.AmiScreenBg
 
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = AmiScreenBg
                 ) {
-                    AmiCoffeMainScreen()
+                    AppNavigation()
                 }
             }
         }
