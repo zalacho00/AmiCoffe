@@ -1,11 +1,11 @@
-package com.example.amicoffe_app.navigation
+/*package com.example.amicoffe_app.navigation
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.amicoffe_app.ui.screens.estado.EstadoScreen
 import com.example.amicoffe_app.ui.screens.menu.AmiCoffeMainScreen
-import com.example.amicoffe_app.ui.screens.pedido.PedidoScreen
+import com.example.amicoffe_app.ui.screens.pedidos.PedidoScreen
 
 data class ProductItem(
     val id: String,
@@ -104,3 +104,4 @@ fun AppNavigation() {
         }
     }
 }
+*/
