@@ -3,7 +3,13 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 import './AuthModal.css';
 
-export default function AuthModal({ onLoginSuccess }) {
+export default function AuthModal({
+  onLoginSuccess,
+  allowedRoles = ['administrador'],
+  title = 'AmiCoffee',
+  subtitle = 'CAMPUS VIBE • PANEL DE CONTROL',
+  wrongRoleMessage = 'Esta cuenta no tiene permisos para entrar aquí.',
+}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,10 +28,10 @@ export default function AuthModal({ onLoginSuccess }) {
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const tokenResult = await credential.user.getIdTokenResult();
-      const role = tokenResult.claims.role; // "administrador" | "cocina" | undefined
+      const role = tokenResult.claims.role;
 
-      if (role !== 'administrador') {
-        setError('Esta cuenta no tiene permisos de administrador.');
+      if (!allowedRoles.includes(role)) {
+        setError(wrongRoleMessage);
         await auth.signOut();
         setIsLoading(false);
         return;
@@ -55,8 +61,8 @@ export default function AuthModal({ onLoginSuccess }) {
           <div className="auth-logo-badge">
             <img src="/amicoffe-logo.png" alt="AmiCoffe Logo" width="44" height="44" style={{ borderRadius: '50%', objectFit: 'contain' }} />
           </div>
-          <h2 className="auth-title">AmiCoffee</h2>
-          <span className="auth-subtitle">CAMPUS VIBE • PANEL DE CONTROL</span>
+          <h2 className="auth-title">{title}</h2>
+          <span className="auth-subtitle">{subtitle}</span>
         </div>
 
         <div className="auth-body">
@@ -64,11 +70,11 @@ export default function AuthModal({ onLoginSuccess }) {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Correo Institucional / Admin</label>
+              <label htmlFor="email">Correo Institucional</label>
               <input
                 id="email"
                 type="email"
-                placeholder="admin@amicoffee.campus"
+                placeholder="correo@amicoffee.campus"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -92,7 +98,7 @@ export default function AuthModal({ onLoginSuccess }) {
                 <span className="spinner">⏳ Conectando...</span>
               ) : (
                 <>
-                  Ingresar al Dashboard
+                  Ingresar
                   <span className="btn-arrow">→</span>
                 </>
               )}

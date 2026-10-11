@@ -814,6 +814,9 @@
 .status-badge.agotado { background: #fee2e2; color: #991b1b; }
 .status-badge.lleno { background: #fee2e2; color: #991b1b; }
 .status-badge.casi-lleno { background: #ffedd5; color: #c2410c; }
+.status-badge.en-espera { background: #fef3c7; color: #92400e; }
+.status-badge.en-preparacion { background: #dbeafe; color: #1e40af; }
+.status-badge.listo-retiro { background: #dcfce7; color: #166534; }
 
 .btn-icon {
   background: none;

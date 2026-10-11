@@ -1,0 +1,129 @@
+.kds-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .kds-board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kds-column {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  min-height: 200px;
+}
+
+.kds-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.kds-column-count {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
+
+.kds-column-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kds-empty-column {
+  font-size: 12px;
+  color: var(--text-light);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.kds-order-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kds-order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kds-order-code {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--funlam-blue);
+}
+
+.kds-order-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.kds-order-student {
+  font-size: 12.5px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.kds-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kds-item-row {
+  display: flex;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-main);
+}
+
+.kds-item-qty {
+  font-weight: 800;
+  color: var(--funlam-orange);
+  min-width: 22px;
+}
+
+.kds-advance-btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.kds-aviso {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
