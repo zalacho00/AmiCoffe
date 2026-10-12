@@ -146,6 +146,13 @@ export default function AdminDashboard() {
                 {activeTab === id && <span className="nav-active-dot" />}
               </button>
             ))}
+            <a href="/kds" className="nav-item" style={{ textDecoration: 'none' }}>
+              <span className="nav-icon-svg"><IconShoppingBag /></span>
+              <span className="nav-text">
+                <span className="nav-label">KDS Cocina</span>
+                <span className="nav-sub">Cola en vivo (HU-05)</span>
+              </span>
+            </a>
           </nav>
 
           {/* User footer */}

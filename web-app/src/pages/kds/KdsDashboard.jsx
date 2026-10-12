@@ -97,6 +97,13 @@ export default function KdsDashboard() {
               </span>
               <span className="nav-active-dot" />
             </button>
+            <a href="/" className="nav-item" style={{ textDecoration: 'none' }}>
+              <span className="nav-icon-svg"><IconMapPin /></span>
+              <span className="nav-text">
+                <span className="nav-label">Panel Administración</span>
+                <span className="nav-sub">Inventario y métricas</span>
+              </span>
+            </a>
           </nav>
 
           <div className="sidebar-user-footer">
@@ -122,7 +129,7 @@ export default function KdsDashboard() {
                 <IconMapPin />
                 Campus Funlam
               </span>
-              <h2 className="header-view-title">Cola de Pedidos — Tiempo Real (HU-05 / HU-06)</h2>
+              <h2 className="header-view-title">Cola de Pedidos — Tiempo Real · HU-05</h2>
             </div>
           </header>
 
