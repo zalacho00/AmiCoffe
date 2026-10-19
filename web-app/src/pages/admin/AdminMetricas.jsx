@@ -86,7 +86,8 @@ export default function AdminMetricas() {
   useEffect(() => {
     async function cargarFranjas() {
       try {
-        const hoyStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+        const d = new Date();
+        const hoyStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const q = query(collection(db, 'metricas_horas_pico'), where('dia', '==', hoyStr));
         const snap = await getDocs(q);
         setFranjasHoy(snap.docs.map((d) => d.data()));
