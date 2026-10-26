@@ -6,6 +6,7 @@ import {
   onSnapshot,
   doc,
   setDoc,
+  writeBatch,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase/config';
@@ -148,7 +149,10 @@ export default function AdminCupos() {
     setErrorMsg('');
     setGuardando(true);
     try {
-      await setDoc(
+      // Se escriben dos documentos a la vez: el privado (admin) y una copia pública
+      // de cupo/duración para que la app de estudiantes calcule su franja y valide el cupo.
+      const batch = writeBatch(db);
+      batch.set(
         GENERAL_REF,
         {
           cupo_maximo: cupo,
@@ -159,6 +163,16 @@ export default function AdminCupos() {
         },
         { merge: true }
       );
+      batch.set(
+        PUBLICO_REF,
+        {
+          cupo_maximo: cupo,
+          duracion_franja_minutos: draft.duracion_franja_minutos,
+          fecha_actualizacion: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      await batch.commit();
       mostrarAviso('✅ Parámetros guardados. Aplican a los pedidos nuevos.');
     } catch (err) {
       console.error(err);
