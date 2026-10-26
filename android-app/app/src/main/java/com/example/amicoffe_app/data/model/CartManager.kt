@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.update
 data class CartState(
     val items: List<CartItem> = emptyList(),
     val sedeSeleccionada: String = "Campus Central",
-    val instruccionesEspeciales: String = ""
+    val instruccionesEspeciales: String = "",
+    val nombreEstudiante: String = ""
 ) {
     val totalItemsCount: Int
         get() = items.sumOf { it.cantidad }
@@ -87,7 +88,10 @@ object CartManager {
 
     fun vaciarCarrito() {
         _cartState.update {
-            CartState(sedeSeleccionada = it.sedeSeleccionada)
+            CartState(
+                sedeSeleccionada = it.sedeSeleccionada,
+                nombreEstudiante = it.nombreEstudiante
+            )
         }
     }
 
@@ -100,6 +104,12 @@ object CartManager {
     fun actualizarSede(sede: String) {
         _cartState.update {
             it.copy(sedeSeleccionada = sede)
+        }
+    }
+
+    fun actualizarNombre(nombre: String) {
+        _cartState.update {
+            it.copy(nombreEstudiante = nombre)
         }
     }
 }

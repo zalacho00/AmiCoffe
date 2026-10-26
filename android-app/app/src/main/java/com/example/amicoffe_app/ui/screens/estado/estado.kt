@@ -21,21 +21,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.amicoffe_app.ui.theme.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.example.amicoffe_app.data.repository.PedidoRepository
 
 @Composable
 fun EstadoScreen(
-    pedidoId: String = "AC-4829",
-    codigoRetiro: String = "4829",
-    sede: String = "Campus Central",
+    pedidoId: String,
     onBackToMenu: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
-    // Extraer los 4 dígitos o usar los últimos 4 caracteres del id
-    val digitos = if (codigoRetiro.length == 4) {
-        codigoRetiro
-    } else {
-        pedidoId.takeLast(4).padStart(4, '0')
+    // Pedido real en tiempo real (el estado cambia cuando cocina lo mueve)
+    val repository = remember { PedidoRepository() }
+    val pedido by repository.observarPedidoPorId(pedidoId).collectAsState(initial = null)
+
+    val sede = pedido?.sede ?: "Campus Central"
+    val digitos = pedido?.codigoRetiro?.takeIf { it.length == 4 } ?: "····"
+
+    val estado = pedido?.estado ?: "en_espera"
+    val cancelado = estado == "cancelado"
+    val paso = when (estado) {
+        "en_preparacion" -> 2
+        "listo", "entregado" -> 3
+        else -> 1
     }
 
     Box(
@@ -81,7 +91,7 @@ fun EstadoScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Tu orden #$pedidoId está lista para ser preparada en $sede.",
+                text = "Tu pedido con código $digitos fue recibido en $sede.",
                 fontSize = 13.sp,
                 color = AmiTextSecondary,
                 textAlign = TextAlign.Center
@@ -196,7 +206,7 @@ fun EstadoScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     LinearProgressIndicator(
-                        progress = { 0.6f },
+                        progress = { paso / 3f },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp),
@@ -211,9 +221,31 @@ fun EstadoScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("1. Recibido ✓", fontSize = 11.sp, color = AmiGreenDark, fontWeight = FontWeight.Bold)
-                        Text("2. En preparación ☕", fontSize = 11.sp, color = AmiGreenDark, fontWeight = FontWeight.Bold)
-                        Text("3. Listo 📦", fontSize = 11.sp, color = AmiTextSecondary)
+                        if (cancelado) {
+                            Text(
+                                "Tu pedido fue cancelado por la cocina.",
+                                fontSize = 13.sp,
+                                color = Color(0xFFDC2626),
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("1. Recibido ✓", fontSize = 11.sp, color = AmiGreenDark, fontWeight = FontWeight.Bold)
+                                Text(
+                                    "2. En preparación ☕", fontSize = 11.sp,
+                                    color = if (paso >= 2) AmiGreenDark else AmiTextSecondary,
+                                    fontWeight = if (paso >= 2) FontWeight.Bold else FontWeight.Normal
+                                )
+                                Text(
+                                    "3. Listo 📦", fontSize = 11.sp,
+                                    color = if (paso >= 3) AmiGreenDark else AmiTextSecondary,
+                                    fontWeight = if (paso >= 3) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
                     }
                 }
             }

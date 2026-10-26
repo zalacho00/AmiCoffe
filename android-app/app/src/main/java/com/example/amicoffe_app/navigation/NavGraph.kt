@@ -39,11 +39,9 @@ fun NavGraph(navController: NavHostController) {
             route = Screen.Estado.route,
             arguments = listOf(navArgument("pedidoId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val pedidoId = backStackEntry.arguments?.getString("pedidoId") ?: "AC-4829"
-            val codigoRetiro = pedidoId.replace("AC-", "").take(4)
+            val pedidoId = backStackEntry.arguments?.getString("pedidoId") ?: ""
             EstadoScreen(
                 pedidoId = pedidoId,
-                codigoRetiro = if (codigoRetiro.isNotEmpty()) codigoRetiro else "4829",
                 onBackToMenu = {
                     navController.navigate(Screen.Menu.route) {
                         popUpTo(Screen.Menu.route) { inclusive = true }

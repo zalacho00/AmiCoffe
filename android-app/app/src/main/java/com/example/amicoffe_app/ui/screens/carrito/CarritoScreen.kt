@@ -35,18 +35,30 @@ fun CarritoScreen(
     viewModel: CarritoViewModel = viewModel()
 ) {
     val cartState by viewModel.cartState.collectAsState()
+    val enviando by viewModel.enviando.collectAsState()
     val context = LocalContext.current
+    val prefs = remember {
+        context.getSharedPreferences("amicoffe_prefs", android.content.Context.MODE_PRIVATE)
+    }
 
     var menuSedeExpandido by remember { mutableStateOf(false) }
+
+    // Recupera el nombre guardado la primera vez que se abre el carrito
+    LaunchedEffect(Unit) {
+        if (cartState.nombreEstudiante.isBlank()) {
+            viewModel.actualizarNombre(prefs.getString("nombre_estudiante", "") ?: "")
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect { event ->
             when (event) {
                 is CarritoUiEvent.PedidoExitoso -> {
+                    prefs.edit().putString("nombre_estudiante", event.pedido.estudianteNombre).apply()
                     onPedidoConfirmado(event.pedido)
                 }
                 is CarritoUiEvent.Error -> {
-                    Toast.makeText(context, event.mensaje, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, event.mensaje, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -375,6 +387,61 @@ fun CarritoScreen(
                     }
                 }
 
+                // Sección: Nombre del estudiante
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp)),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(18.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = null,
+                                    tint = AmiGreenDark,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "¿A nombre de quién?",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AmiTextPrimary
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "La barra usará este nombre junto a tu código de retiro.",
+                                fontSize = 12.sp,
+                                color = AmiTextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            OutlinedTextField(
+                                value = cartState.nombreEstudiante,
+                                onValueChange = { viewModel.actualizarNombre(it) },
+                                placeholder = {
+                                    Text("Tu nombre", fontSize = 13.sp, color = Color(0xFF94A3B8))
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color(0xFFFAFAFA), RoundedCornerShape(12.dp)),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedBorderColor = Color(0xFFE2E8F0),
+                                    focusedBorderColor = AmiGreenDark,
+                                    focusedContainerColor = Color(0xFFFAFAFA),
+                                    unfocusedContainerColor = Color(0xFFFAFAFA)
+                                ),
+                                singleLine = true
+                            )
+                        }
+                    }
+                }
+
                 // Sección: Resumen de pago
                 item {
                     Card(
@@ -451,7 +518,7 @@ fun CarritoScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Pago en efectivo al retirar tu pedido en barra con el código QR.",
+                                    text = "Pago en efectivo al retirar tu pedido en barra con tu código de retiro.",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = AmiGreenDark
@@ -460,9 +527,10 @@ fun CarritoScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Botón principal: Pedir y Recoger en Barra (Genera el QR de retiro)
+                            // Botón principal: Pedir y Recoger en Barra (genera el código de retiro)
                             Button(
                                 onClick = { viewModel.realizarPedidoRemoto() },
+                                enabled = !enviando,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(54.dp),
@@ -480,7 +548,7 @@ fun CarritoScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Pedir y Recoger en Barra - $${"%,.0f".format(cartState.total)} COP",
+                                        text = if (enviando) "Procesando pedido..." else "Pedir y Recoger en Barra - $${"%,.0f".format(cartState.total)} COP",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold
                                     )

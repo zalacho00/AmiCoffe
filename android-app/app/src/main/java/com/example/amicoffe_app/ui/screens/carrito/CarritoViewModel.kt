@@ -7,9 +7,11 @@ import com.example.amicoffe_app.data.repository.CartManager
 import com.example.amicoffe_app.data.repository.CartState
 import com.example.amicoffe_app.data.repository.PedidoRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed class CarritoUiEvent {
@@ -25,6 +27,9 @@ class CarritoViewModel(
 
     private val _eventFlow = MutableSharedFlow<CarritoUiEvent>()
     val eventFlow: SharedFlow<CarritoUiEvent> = _eventFlow.asSharedFlow()
+
+    private val _enviando = MutableStateFlow(false)
+    val enviando: StateFlow<Boolean> = _enviando.asStateFlow()
 
     fun incrementarCantidad(productoId: String) {
         CartManager.incrementarCantidad(productoId)
@@ -50,28 +55,44 @@ class CarritoViewModel(
         CartManager.actualizarSede(sede)
     }
 
+    fun actualizarNombre(nombre: String) {
+        CartManager.actualizarNombre(nombre.take(40))
+    }
+
     fun realizarPedidoRemoto() {
+        if (_enviando.value) return   // evita crear dos pedidos con doble toque
+
         val currentState = cartState.value
         if (currentState.items.isEmpty()) {
-            viewModelScope.launch {
-                _eventFlow.emit(CarritoUiEvent.Error("El carrito está vacío"))
-            }
+            emitirError("El carrito está vacío")
+            return
+        }
+        val nombre = currentState.nombreEstudiante.trim()
+        if (nombre.isEmpty()) {
+            emitirError("Escribe tu nombre para que la barra sepa a quién entregar el pedido")
             return
         }
 
+        _enviando.value = true
         pedidoRepository.crearPedidoRemoto(
-            cartState = currentState,
+            cartState = currentState.copy(nombreEstudiante = nombre),
             onSuccess = { pedidoCreado ->
+                _enviando.value = false
                 CartManager.vaciarCarrito()
                 viewModelScope.launch {
                     _eventFlow.emit(CarritoUiEvent.PedidoExitoso(pedidoCreado))
                 }
             },
             onError = { error ->
-                viewModelScope.launch {
-                    _eventFlow.emit(CarritoUiEvent.Error("Error al procesar pedido: ${error.localizedMessage}"))
-                }
+                _enviando.value = false
+                emitirError(error.message ?: "No se pudo crear el pedido")
             }
         )
+    }
+
+    private fun emitirError(mensaje: String) {
+        viewModelScope.launch {
+            _eventFlow.emit(CarritoUiEvent.Error(mensaje))
+        }
     }
 }

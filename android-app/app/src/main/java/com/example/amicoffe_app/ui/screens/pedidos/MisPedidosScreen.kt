@@ -135,22 +135,26 @@ fun MisPedidosScreen() {
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
                                         color = when (pedido.estado) {
-                                            "en_preparacion" -> Color(0xFFFEF3C7)
+                                            "en_espera", "en_preparacion" -> Color(0xFFFEF3C7)
                                             "listo" -> Color(0xFFDCFCE7)
+                                            "cancelado" -> Color(0xFFFEE2E2)
                                             else -> Color(0xFFF1F5F9)
                                         }
                                     ) {
                                         Text(
                                             text = when (pedido.estado) {
+                                                "en_espera" -> "En espera"
                                                 "en_preparacion" -> "En preparación"
                                                 "listo" -> "¡Listo para retirar!"
+                                                "cancelado" -> "Cancelado"
                                                 else -> "Entregado"
                                             },
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = when (pedido.estado) {
-                                                "en_preparacion" -> Color(0xFFD97706)
+                                                "en_espera", "en_preparacion" -> Color(0xFFD97706)
                                                 "listo" -> AmiGreenDark
+                                                "cancelado" -> Color(0xFFDC2626)
                                                 else -> AmiTextSecondary
                                             },
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)

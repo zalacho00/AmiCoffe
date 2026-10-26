@@ -30,11 +30,15 @@ import com.example.amicoffe_app.data.repository.CartManager
 import com.example.amicoffe_app.navigation.NavGraph
 import com.example.amicoffe_app.navigation.Screen
 import com.example.amicoffe_app.ui.theme.*
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            FirebaseAuth.getInstance().signInAnonymously()
+        }
         setContent {
             AmiCoffeappTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = AmiScreenBg) {
