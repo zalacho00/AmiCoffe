@@ -21,7 +21,7 @@ exports.actualizarStock = onCall(async (request) => {
   }
 
   const token = request.auth.token;
-  if (!token.administrador && token.role !== "admin") {
+  if (token.role !== "administrador") {
     throw new HttpsError(
       "permission-denied",
       "Se requieren permisos de Administrador para modificar el inventario."
@@ -71,24 +71,12 @@ exports.actualizarStock = onCall(async (request) => {
       const productoData = productoDoc.data();
       const stockAnterior = productoData.stock ?? 0;
 
-      // Recalcular estado y visibilidad en la misma escritura
-      let nuevoEstado = "Disponible";
-      let disponible = true;
+      // Mismo criterio que el panel admin: 'agotado' solo en 0, si no 'disponible'
+      const nuevoEstado = nuevoStock === 0 ? "agotado" : "disponible";
 
-      if (nuevoStock === 0) {
-        nuevoEstado = "Agotado";
-        disponible = false; // Se oculta automáticamente en la app cliente vía query/onSnapshot
-      } else if (nuevoStock <= 15) {
-        nuevoEstado = "Bajo Stock";
-        disponible = true;
-      }
-
-      // Actualizar documento de producto
       transaction.update(productoRef, {
         stock: nuevoStock,
         estado: nuevoEstado,
-        disponible: disponible,
-        actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
       });
 
       // Crear documento en auditoria_inventario
@@ -102,7 +90,7 @@ exports.actualizarStock = onCall(async (request) => {
         fecha: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      return { stockAnterior, stockNuevo: nuevoStock, nuevoEstado, disponible };
+            return { stockAnterior, stockNuevo: nuevoStock, nuevoEstado };
     });
 
     return {
