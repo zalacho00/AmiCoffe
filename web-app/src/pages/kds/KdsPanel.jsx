@@ -13,16 +13,18 @@ import { db, auth } from '../../firebase/config';
 import './KdsPanel.css';
 
 /* ─── HU-05: solo estados activos en cocina ─────────────────── */
-const ESTADOS_ACTIVOS = ['en_espera', 'en_preparacion'];
+const ESTADOS_ACTIVOS = ['en_espera', 'en_preparacion', 'listo'];
 
 const SIGUIENTE_ESTADO = {
   en_espera: 'en_preparacion',
   en_preparacion: 'listo',
+  listo: 'entregado',
 };
 
 const BOTON_LABEL = {
   en_espera: 'Iniciar preparación',
   en_preparacion: 'Marcar listo',
+  listo: 'Marcar entregado',
 };
 
 const COL_META = {
@@ -37,6 +39,12 @@ const COL_META = {
     emoji: '🔥',
     colorClass: 'col-prep',
     badgeClass: 'badge-prep',
+  },
+  listo: {
+    titulo: 'Listo para Retirar',
+    emoji: '✅',
+    colorClass: 'col-listo',
+    badgeClass: 'badge-listo',
   },
 };
 
@@ -79,11 +87,12 @@ function elapsedMinutes(ts) {
 }
 
 /* ─── Tarjeta individual ────────────────────────────────────── */
-function OrderCard({ pedido, onAdvance, advancing }) {
+function OrderCard({ pedido, onAdvance, onCancel, advancing }) {
   const elapsed = useElapsed(pedido.fecha_creacion);
   const mins = elapsedMinutes(pedido.fecha_creacion);
-  const urgente = mins > 10;
-  const advertencia = mins > 5 && mins <= 10;
+  const enCurso = pedido.estado !== 'listo';
+  const urgente = enCurso && mins > 10;
+  const advertencia = enCurso && mins > 5 && mins <= 10;
 
   return (
     <div
@@ -114,7 +123,9 @@ function OrderCard({ pedido, onAdvance, advancing }) {
       {BOTON_LABEL[pedido.estado] && (
         <button
           id={`advance-btn-${pedido.id}`}
-          className={`kds-btn-advance${pedido.estado === 'en_espera' ? ' btn-start' : ' btn-ready'}`}
+          className={`kds-btn-advance${
+            pedido.estado === 'en_espera' ? ' btn-start' : pedido.estado === 'listo' ? ' btn-deliver' : ' btn-ready'
+          }`}
           onClick={() => onAdvance(pedido)}
           disabled={advancing === pedido.id}
         >
@@ -125,6 +136,14 @@ function OrderCard({ pedido, onAdvance, advancing }) {
           )}
         </button>
       )}
+        <button
+          id={`cancel-btn-${pedido.id}`}
+          className="kds-btn-cancel"
+          onClick={() => onCancel(pedido)}
+          disabled={advancing === pedido.id}
+      >
+        Cancelar pedido
+      </button>
     </div>
   );
 }
@@ -178,10 +197,9 @@ export default function KdsPanel() {
     return () => unsub();
   }, []);
 
-  /* ── HU-06: avanzar estado con transacción atómica ── */
-  const avanzarEstado = useCallback(
-    async (pedido) => {
-      const nuevoEstado = SIGUIENTE_ESTADO[pedido.estado];
+    /* ── HU-06: cambiar estado con transacción atómica (avanzar o cancelar) ── */
+  const cambiarEstado = useCallback(
+    async (pedido, nuevoEstado) => {
       if (!nuevoEstado || advancing) return;
 
       setAdvancing(pedido.id);
@@ -194,8 +212,13 @@ export default function KdsPanel() {
           if (!snap.exists()) throw new Error('inexistente');
 
           const data = snap.data();
-          const siguienteReal = SIGUIENTE_ESTADO[data.estado];
-          if (siguienteReal !== nuevoEstado) throw new Error('ya_actualizado');
+          // Otro cocinero ya movió este pedido → no pisar su cambio
+          if (data.estado !== pedido.estado) throw new Error('ya_actualizado');
+          const valido =
+            nuevoEstado === 'cancelado'
+              ? ESTADOS_ACTIVOS.includes(data.estado)
+              : SIGUIENTE_ESTADO[data.estado] === nuevoEstado;
+          if (!valido) throw new Error('ya_actualizado');
 
           const historial = [
             ...(data.historial_estados ?? []),
@@ -225,9 +248,24 @@ export default function KdsPanel() {
     [advancing]
   );
 
+  const avanzarEstado = useCallback(
+    (pedido) => cambiarEstado(pedido, SIGUIENTE_ESTADO[pedido.estado]),
+    [cambiarEstado]
+  );
+
+  const cancelarPedido = useCallback(
+    (pedido) => {
+      if (window.confirm(`¿Cancelar el pedido ${pedido.codigo_retiro ?? ''}? Esta acción no se puede deshacer.`)) {
+        cambiarEstado(pedido, 'cancelado');
+      }
+    },
+    [cambiarEstado]
+  );
+
   const grupos = {
     en_espera: pedidos.filter((p) => p.estado === 'en_espera'),
     en_preparacion: pedidos.filter((p) => p.estado === 'en_preparacion'),
+    listo: pedidos.filter((p) => p.estado === 'listo'),
   };
 
   if (loading) {
@@ -319,6 +357,7 @@ export default function KdsPanel() {
                       key={pedido.id}
                       pedido={pedido}
                       onAdvance={avanzarEstado}
+                      onCancel={cancelarPedido}
                       advancing={advancing}
                     />
                   ))
@@ -332,7 +371,7 @@ export default function KdsPanel() {
       {/* Referencia técnica HU-05 */}
       <p className="kds-footnote">
         ★ HU-05 · Query:{' '}
-        <code>where("estado","in",["en_espera","en_preparacion"]) · orderBy("fecha_creacion","asc")</code>
+        <code>where("estado","in",["en_espera","en_preparacion","listo"]) · orderBy("fecha_creacion","asc")</code>
         {' '}— <code>fecha_creacion</code> se fija con <code>serverTimestamp()</code> al crear el pedido y nunca se modifica.
       </p>
     </div>

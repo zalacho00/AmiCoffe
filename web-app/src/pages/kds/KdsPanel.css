@@ -107,12 +107,12 @@
 /* ── Tablero ── */
 .kds-board {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 18px;
   align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .kds-board { grid-template-columns: 1fr; }
 }
 
@@ -388,4 +388,41 @@
   padding: 1px 5px;
   border-radius: 4px;
   color: var(--funlam-navy);
+}
+
+.col-listo {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.badge-listo {
+  background: #bbf7d0;
+  color: #14532d;
+  border: 1px solid #86efac;
+}
+.btn-deliver {
+  background: #16a34a;
+  color: #ffffff;
+}
+.btn-deliver:hover:not(:disabled) {
+  background: #15803d;
+}
+.kds-btn-cancel {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px 12px;
+  background: transparent;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.kds-btn-cancel:hover:not(:disabled) {
+  background: #fef2f2;
+}
+.kds-btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
