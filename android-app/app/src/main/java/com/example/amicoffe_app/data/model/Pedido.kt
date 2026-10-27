@@ -22,5 +22,6 @@ data class Pedido(
     val dia: String = "",                 // "2026-10-26" en hora Colombia
     val franjaHoraria: String = "",       // "12:00 - 12:10"
     val tiempoEstimadoMin: Int = 5,
-    val fechaTimestamp: Long = System.currentTimeMillis()  // fecha_creacion en milisegundos
+    val fechaTimestamp: Long = System.currentTimeMillis(),  // fecha_creacion en milisegundos
+    val oculto: Boolean = false           // true = el estudiante lo quitó de su historial
 )

@@ -123,6 +123,19 @@ class PedidoRepository(
                         "estado" to if (nuevoStock == 0) "agotado" else "disponible"
                     )
                 )
+                tx.set(
+                    db.collection("auditoria_inventario").document(),
+                    mapOf(
+                        "producto_id" to item.producto.id,
+                        "nombre_producto" to item.producto.nombre,
+                        "tipo_cambio" to "venta",
+                        "stock_anterior" to nuevoStock + item.cantidad,
+                        "stock_nuevo" to nuevoStock,
+                        "administrador" to "Pedido $codigo (app)",
+                        "pedido_id" to pedidoRef.id,
+                        "fecha" to FieldValue.serverTimestamp()
+                    )
+                )
 
                 mapOf(
                     "producto_id" to item.producto.id,
@@ -255,14 +268,33 @@ class PedidoRepository(
                         }
                         val lista = snapshot?.documents
                             ?.map { it.toPedido() }
+                            ?.filter { !it.oculto }
                             ?.sortedByDescending { it.fechaTimestamp }
                             ?: emptyList()
-                        trySend(lista)
                     }
             },
             onFail = { trySend(emptyList()) }
         )
         awaitClose { listener?.remove() }
+    }
+
+
+    /** "Borrar historial": oculta los pedidos finalizados del estudiante (el documento se conserva). */
+    fun ocultarPedidos(ids: List<String>, onDone: (Boolean) -> Unit = {}) {
+        if (ids.isEmpty()) {
+            onDone(true)
+            return
+        }
+        val batch = db.batch()
+        ids.forEach { id ->
+            batch.update(db.collection("pedidos").document(id), "oculto_estudiante", true)
+        }
+        batch.commit()
+            .addOnSuccessListener { onDone(true) }
+            .addOnFailureListener {
+                Log.e("PedidoRepository", "ocultarPedidos", it)
+                onDone(false)
+            }
     }
 
     // ───────────────────────── Helpers ─────────────────────────
@@ -313,6 +345,7 @@ private fun DocumentSnapshot.toPedido(): Pedido {
         codigoRetiro = getString("codigo_retiro") ?: "",
         dia = getString("dia") ?: "",
         franjaHoraria = getString("franja_horaria") ?: "",
+        oculto = getBoolean("oculto_estudiante") ?: false,
         fechaTimestamp = getTimestamp("fecha_creacion", DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)
             ?.toDate()?.time ?: System.currentTimeMillis()
     )

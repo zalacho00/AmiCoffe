@@ -36,6 +36,7 @@ fun CarritoScreen(
 ) {
     val cartState by viewModel.cartState.collectAsState()
     val enviando by viewModel.enviando.collectAsState()
+    val tiempoEspera by viewModel.tiempoEspera.collectAsState()
     val context = LocalContext.current
     val prefs = remember {
         context.getSharedPreferences("amicoffe_prefs", android.content.Context.MODE_PRIVATE)
@@ -501,6 +502,30 @@ fun CarritoScreen(
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color(0xFFFFF7ED), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Timer,
+                                    contentDescription = null,
+                                    tint = AmiAccentOrange,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Tiempo estimado de espera: $tiempoEspera min",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = AmiTextPrimary
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             // Nota de pago en efectivo
                             Row(

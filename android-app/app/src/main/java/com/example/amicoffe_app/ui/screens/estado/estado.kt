@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.example.amicoffe_app.data.repository.PedidoRepository
+import com.example.amicoffe_app.data.repository.ConfigRepository
 
 @Composable
 fun EstadoScreen(
@@ -36,6 +37,8 @@ fun EstadoScreen(
     // Pedido real en tiempo real (el estado cambia cuando cocina lo mueve)
     val repository = remember { PedidoRepository() }
     val pedido by repository.observarPedidoPorId(pedidoId).collectAsState(initial = null)
+    val configRepository = remember { ConfigRepository() }
+    val tiempoEspera by configRepository.observarTiempoEspera().collectAsState(initial = "4-6")
 
     val sede = pedido?.sede ?: "Campus Central"
     val digitos = pedido?.codigoRetiro?.takeIf { it.length == 4 } ?: "····"
@@ -196,7 +199,7 @@ fun EstadoScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Tiempo estimado: ~5 min",
+                            text = "Tiempo estimado: $tiempoEspera min",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                             color = AmiTextPrimary

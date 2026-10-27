@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.amicoffe_app.data.repository.ConfigRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 sealed class CarritoUiEvent {
     data class PedidoExitoso(val pedido: Pedido) : CarritoUiEvent()
@@ -20,8 +23,12 @@ sealed class CarritoUiEvent {
 }
 
 class CarritoViewModel(
-    private val pedidoRepository: PedidoRepository = PedidoRepository()
+    private val pedidoRepository: PedidoRepository = PedidoRepository(),
+    configRepository: ConfigRepository = ConfigRepository()
 ) : ViewModel() {
+
+    val tiempoEspera: StateFlow<String> = configRepository.observarTiempoEspera()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "4-6")
 
     val cartState: StateFlow<CartState> = CartManager.cartState
 

@@ -30,6 +30,9 @@ fun MisPedidosScreen() {
 
     var pedidoSeleccionadoParaCodigo by remember { mutableStateOf<Pedido?>(null) }
 
+    var mostrarConfirmarBorrado by remember { mutableStateOf(false) }
+    val finalizados = pedidos.filter { it.estado == "entregado" || it.estado == "cancelado" }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -40,7 +43,7 @@ fun MisPedidosScreen() {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -61,6 +64,17 @@ fun MisPedidosScreen() {
                     fontWeight = FontWeight.Bold,
                     color = AmiTextPrimary
                 )
+                if (finalizados.isNotEmpty()) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(onClick = { mostrarConfirmarBorrado = true }) {
+                        Text(
+                            "Borrar historial",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFDC2626)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -306,6 +320,23 @@ fun MisPedidosScreen() {
                 containerColor = Color.White,
                 shape = RoundedCornerShape(20.dp)
             )
+
+            if (mostrarConfirmarBorrado) {
+                AlertDialog(
+                    onDismissRequest = { mostrarConfirmarBorrado = false },
+                    title = { Text("Borrar historial") },
+                    text = { Text("Se quitarán de tu lista los pedidos entregados y cancelados. Los pedidos en curso no se tocan.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            repository.ocultarPedidos(finalizados.map { it.id })
+                            mostrarConfirmarBorrado = false
+                        }) { Text("Borrar", color = Color(0xFFDC2626)) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { mostrarConfirmarBorrado = false }) { Text("Cancelar") }
+                    }
+                )
+            }
         }
     }
 }
