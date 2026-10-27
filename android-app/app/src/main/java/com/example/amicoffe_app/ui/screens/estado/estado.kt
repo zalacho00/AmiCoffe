@@ -45,6 +45,8 @@ fun EstadoScreen(
 
     val estado = pedido?.estado ?: "en_espera"
     val cancelado = estado == "cancelado"
+    val entregado = estado == "entregado"
+    val finalizado = entregado || cancelado
     val paso = when (estado) {
         "en_preparacion" -> 2
         "listo", "entregado" -> 3
@@ -85,7 +87,11 @@ fun EstadoScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "¡Pedido Confirmado!",
+                text = when {
+                    entregado -> "¡Pedido entregado!"
+                    cancelado -> "Pedido cancelado"
+                    else -> "¡Pedido Confirmado!"
+                },
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = AmiTextPrimary
@@ -94,7 +100,11 @@ fun EstadoScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Tu pedido con código $digitos fue recibido en $sede.",
+                text = when {
+                    entregado -> "Gracias por tu compra en $sede. ¡Que lo disfrutes!"
+                    cancelado -> "La cocina canceló este pedido. Puedes hacer uno nuevo desde el menú."
+                    else -> "Tu pedido con código $digitos fue recibido en $sede."
+                },
                 fontSize = 13.sp,
                 color = AmiTextSecondary,
                 textAlign = TextAlign.Center
@@ -102,157 +112,163 @@ fun EstadoScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Tarjeta de CÓDIGO DE RETIRO DE 4 DÍGITOS
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(22.dp)),
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
+            if (finalizado) {
+                // Tarjeta de CÓDIGO DE RETIRO DE 4 DÍGITOS
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(22.dp)),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .background(AmiGreenLight, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Pin,
-                            contentDescription = null,
-                            tint = AmiGreenDark,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Código de Retiro",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = AmiGreenDark
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    // Muestra los 4 dígitos en casillas individuales
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        digitos.forEach { char ->
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .background(AmiScreenBg, RoundedCornerShape(14.dp))
-                                    .border(2.dp, AmiGreenDark, RoundedCornerShape(14.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = char.toString(),
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = AmiGreenDark
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    Text(
-                        text = "Muestra o dicta este código de 4 dígitos en la barra de atención para reclamar tu pedido sin hacer fila física.",
-                        fontSize = 12.sp,
-                        color = AmiTextSecondary,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 16.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tarjeta de Estado y Tiempo estimado
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Timer,
-                            contentDescription = null,
-                            tint = AmiAccentOrange,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Tiempo estimado: $tiempoEspera min",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = AmiTextPrimary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    LinearProgressIndicator(
-                        progress = { paso / 3f },
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(8.dp),
-                        color = AmiGreenDark,
-                        trackColor = Color(0xFFE2E8F0)
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Pasos de estado
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (cancelado) {
-                            Text(
-                                "Tu pedido fue cancelado por la cocina.",
-                                fontSize = 13.sp,
-                                color = Color(0xFFDC2626),
-                                fontWeight = FontWeight.Bold
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .background(AmiGreenLight, RoundedCornerShape(12.dp))
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Pin,
+                                contentDescription = null,
+                                tint = AmiGreenDark,
+                                modifier = Modifier.size(18.dp)
                             )
-                        } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("1. Recibido ✓", fontSize = 11.sp, color = AmiGreenDark, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Código de Retiro",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AmiGreenDark
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(18.dp))
+
+                        // Muestra los 4 dígitos en casillas individuales
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            digitos.forEach { char ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .background(AmiScreenBg, RoundedCornerShape(14.dp))
+                                        .border(2.dp, AmiGreenDark, RoundedCornerShape(14.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = char.toString(),
+                                        fontSize = 28.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = AmiGreenDark
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(18.dp))
+
+                        Text(
+                            text = "Muestra o dicta este código de 4 dígitos en la barra de atención para reclamar tu pedido sin hacer fila física.",
+                            fontSize = 12.sp,
+                            color = AmiTextSecondary,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Tarjeta de Estado y Tiempo estimado
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Timer,
+                                contentDescription = null,
+                                tint = AmiAccentOrange,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Tiempo estimado: $tiempoEspera min",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AmiTextPrimary
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        LinearProgressIndicator(
+                            progress = { paso / 3f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp),
+                            color = AmiGreenDark,
+                            trackColor = Color(0xFFE2E8F0)
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Pasos de estado
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (cancelado) {
                                 Text(
-                                    "2. En preparación ☕", fontSize = 11.sp,
-                                    color = if (paso >= 2) AmiGreenDark else AmiTextSecondary,
-                                    fontWeight = if (paso >= 2) FontWeight.Bold else FontWeight.Normal
+                                    "Tu pedido fue cancelado por la cocina.",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFFDC2626),
+                                    fontWeight = FontWeight.Bold
                                 )
-                                Text(
-                                    "3. Listo 📦", fontSize = 11.sp,
-                                    color = if (paso >= 3) AmiGreenDark else AmiTextSecondary,
-                                    fontWeight = if (paso >= 3) FontWeight.Bold else FontWeight.Normal
-                                )
+                            } else {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "1. Recibido ✓",
+                                        fontSize = 11.sp,
+                                        color = AmiGreenDark,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        "2. En preparación ☕", fontSize = 11.sp,
+                                        color = if (paso >= 2) AmiGreenDark else AmiTextSecondary,
+                                        fontWeight = if (paso >= 2) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                    Text(
+                                        "3. Listo 📦", fontSize = 11.sp,
+                                        color = if (paso >= 3) AmiGreenDark else AmiTextSecondary,
+                                        fontWeight = if (paso >= 3) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(

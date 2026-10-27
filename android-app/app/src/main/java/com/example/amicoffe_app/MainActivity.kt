@@ -31,6 +31,7 @@ import com.example.amicoffe_app.navigation.NavGraph
 import com.example.amicoffe_app.navigation.Screen
 import com.example.amicoffe_app.ui.theme.*
 import com.google.firebase.auth.FirebaseAuth
+import com.example.amicoffe_app.data.repository.MisPedidosStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
         if (FirebaseAuth.getInstance().currentUser == null) {
             FirebaseAuth.getInstance().signInAnonymously()
         }
+        MisPedidosStore.init(applicationContext)
         setContent {
             AmiCoffeappTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = AmiScreenBg) {
@@ -88,9 +90,9 @@ fun AmiBottomBar(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.clickableNoRipple {
                         navController.navigate(route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = false }
                             launchSingleTop = true
-                            restoreState = true
+                            restoreState = false
                         }
                     }
                 ) {

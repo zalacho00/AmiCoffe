@@ -253,29 +253,45 @@ class PedidoRepository(
         awaitClose { listener?.remove() }
     }
 
-    /** 'Mis Pedidos': solo los pedidos del uid anónimo de este teléfono. */
-    fun observarMisPedidos(): Flow<List<Pedido>> = callbackFlow {
-        var listener: ListenerRegistration? = null
-        asegurarSesion(
-            onOk = { uid ->
-                listener = db.collection("pedidos")
-                    .whereEqualTo("estudiante_uid", uid)
-                    .addSnapshotListener { snapshot, error ->
-                        if (error != null) {
-                            Log.e("PedidoRepository", "observarMisPedidos", error)
-                            trySend(emptyList())
-                            return@addSnapshotListener
-                        }
-                        val lista = snapshot?.documents
-                            ?.map { it.toPedido() }
-                            ?.filter { !it.oculto }
-                            ?.sortedByDescending { it.fechaTimestamp }
-                            ?: emptyList()
+
+    /** 'Mis Pedidos': escucha cada pedido guardado en el teléfono, por su ID. */
+    fun observarMisPedidos(ids: List<String>): Flow<List<Pedido>> = callbackFlow {
+        val listeners = mutableListOf<ListenerRegistration>()
+        val actuales = mutableMapOf<String, Pedido>()
+
+        fun emitir() {
+            trySend(
+                actuales.values
+                    .filter { !it.oculto }
+                    .sortedByDescending { it.fechaTimestamp }
+            )
+        }
+
+        if (ids.isEmpty()) {
+            trySend(emptyList())
+        } else {
+            asegurarSesion(
+                onOk = {
+                    ids.forEach { id ->
+                        listeners += db.collection("pedidos").document(id)
+                            .addSnapshotListener { snapshot, error ->
+                                if (error != null) {
+                                    Log.e("PedidoRepository", "observarMisPedidos($id)", error)
+                                    return@addSnapshotListener
+                                }
+                                if (snapshot != null && snapshot.exists()) {
+                                    actuales[id] = snapshot.toPedido()
+                                } else {
+                                    actuales.remove(id)
+                                }
+                                emitir()
+                            }
                     }
-            },
-            onFail = { trySend(emptyList()) }
-        )
-        awaitClose { listener?.remove() }
+                },
+                onFail = { trySend(emptyList()) }
+            )
+        }
+        awaitClose { listeners.forEach { it.remove() } }
     }
 
 

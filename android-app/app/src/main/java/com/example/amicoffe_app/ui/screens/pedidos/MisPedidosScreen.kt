@@ -22,11 +22,14 @@ import androidx.compose.ui.unit.sp
 import com.example.amicoffe_app.data.model.Pedido
 import com.example.amicoffe_app.data.repository.PedidoRepository
 import com.example.amicoffe_app.ui.theme.*
+import com.example.amicoffe_app.data.repository.MisPedidosStore
 
 @Composable
 fun MisPedidosScreen() {
     val repository = remember { PedidoRepository() }
-    val pedidos by repository.observarMisPedidos().collectAsState(initial = emptyList())
+    val ids by MisPedidosStore.ids.collectAsState()
+    val pedidos by remember(ids) { repository.observarMisPedidos(ids) }
+        .collectAsState(initial = emptyList())
 
     var pedidoSeleccionadoParaCodigo by remember { mutableStateOf<Pedido?>(null) }
 
@@ -121,6 +124,9 @@ fun MisPedidosScreen() {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(pedidos, key = { it.id }) { pedido ->
+                        val activo = pedido.estado == "en_espera" ||
+                                pedido.estado == "en_preparacion" ||
+                                pedido.estado == "listo"
                         val digitos = if (pedido.codigoRetiro.length == 4) {
                             pedido.codigoRetiro
                         } else {
@@ -184,18 +190,20 @@ fun MisPedidosScreen() {
                                         fontSize = 13.sp,
                                         color = AmiTextSecondary
                                     )
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .background(AmiGreenLight, RoundedCornerShape(8.dp))
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = "Código: $digitos",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = AmiGreenDark
-                                        )
+                                    if (activo) {
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .background(AmiGreenLight, RoundedCornerShape(8.dp))
+                                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = "Código: $digitos",
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = AmiGreenDark
+                                            )
+                                        }
                                     }
                                 }
 
@@ -222,24 +230,33 @@ fun MisPedidosScreen() {
                                         fontWeight = FontWeight.Bold,
                                         color = AmiGreenDark
                                     )
-
-                                    Button(
-                                        onClick = { pedidoSeleccionadoParaCodigo = pedido },
-                                        colors = ButtonDefaults.buttonColors(containerColor = AmiGreenDark),
-                                        shape = RoundedCornerShape(14.dp),
-                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Pin,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp)
+                                    if (activo) {
+                                        Button(
+                                            onClick = { pedidoSeleccionadoParaCodigo = pedido },
+                                            colors = ButtonDefaults.buttonColors(containerColor = AmiGreenDark),
+                                            shape = RoundedCornerShape(14.dp),
+                                            contentPadding = PaddingValues(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
                                             )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Ver Código", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Pin,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    "Ver Código",
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                         }
                                     }
                                 }
+
                             }
                         }
                     }
@@ -340,3 +357,5 @@ fun MisPedidosScreen() {
         }
     }
 }
+
+

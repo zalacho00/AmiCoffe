@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import com.example.amicoffe_app.data.repository.ConfigRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import com.example.amicoffe_app.data.repository.MisPedidosStore
 
 sealed class CarritoUiEvent {
     data class PedidoExitoso(val pedido: Pedido) : CarritoUiEvent()
@@ -85,6 +86,7 @@ class CarritoViewModel(
             cartState = currentState.copy(nombreEstudiante = nombre),
             onSuccess = { pedidoCreado ->
                 _enviando.value = false
+                MisPedidosStore.agregar(pedidoCreado.id)
                 CartManager.vaciarCarrito()
                 viewModelScope.launch {
                     _eventFlow.emit(CarritoUiEvent.PedidoExitoso(pedidoCreado))
