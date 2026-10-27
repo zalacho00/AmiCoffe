@@ -8,6 +8,7 @@ import {
   doc,
   runTransaction,
   Timestamp,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase/config';
 import './KdsPanel.css';
@@ -217,19 +218,74 @@ export default function KdsPanel() {
           if (!snap.exists()) throw new Error('inexistente');
 
           const data = snap.data();
-          // Otro cocinero ya movió este pedido → no pisar su cambio
           if (data.estado !== pedido.estado) throw new Error('ya_actualizado');
-          const valido =
-            nuevoEstado === 'cancelado'
-              ? ESTADOS_ACTIVOS.includes(data.estado)
-              : SIGUIENTE_ESTADO[data.estado] === nuevoEstado;
+          const cancelando = nuevoEstado === 'cancelado';
+          const valido = cancelando
+            ? ESTADOS_ACTIVOS.includes(data.estado)
+            : SIGUIENTE_ESTADO[data.estado] === nuevoEstado;
           if (!valido) throw new Error('ya_actualizado');
+
+          // ── Si se cancela: leer lo que hay que devolver (todas las lecturas antes de escribir) ──
+          let productosADevolver = [];
+          let franjaRef = null;
+          let franjaSnap = null;
+          let cupo = 15;
+
+          if (cancelando) {
+            const items = Array.isArray(data.items) ? data.items : [];
+            const cantidades = new Map(); // producto_id → cantidad total
+            items.forEach((it) => {
+              if (!it.producto_id) return;
+              cantidades.set(it.producto_id, (cantidades.get(it.producto_id) || 0) + (it.cantidad || 0));
+            });
+            productosADevolver = await Promise.all(
+              Array.from(cantidades.entries()).map(async ([id, cantidad]) => {
+                const ref = doc(db, 'productos', id);
+                return { ref, cantidad, snap: await tx.get(ref) };
+              })
+            );
+
+            if (data.dia && data.franja_horaria) {
+              // "12:00 - 12:10" → "1200-1210" (mismo id que arma la app)
+              const franjaId = `${data.dia}_${data.franja_horaria.replace(/:/g, '').replace(' - ', '-')}`;
+              franjaRef = doc(db, 'metricas_horas_pico', franjaId);
+              franjaSnap = await tx.get(franjaRef);
+              const pub = await tx.get(doc(db, 'configuracion_cupos', 'publico'));
+              if (pub.exists() && Number.isInteger(pub.data().cupo_maximo)) cupo = pub.data().cupo_maximo;
+            }
+          }
+
+          // ── Escrituras ──
+          if (cancelando) {
+            productosADevolver.forEach(({ ref, cantidad, snap: pSnap }) => {
+              if (!pSnap.exists() || cantidad <= 0) return;
+              const anterior = pSnap.data().stock ?? 0;
+              const nuevo = anterior + cantidad;
+              tx.update(ref, { stock: nuevo, estado: 'disponible' });
+              tx.set(doc(collection(db, 'auditoria_inventario')), {
+                producto_id: ref.id,
+                nombre_producto: pSnap.data().nombre ?? '',
+                tipo_cambio: 'cancelacion',
+                stock_anterior: anterior,
+                stock_nuevo: nuevo,
+                administrador: `Cancelación pedido ${data.codigo_retiro ?? ''} · ${quien}`,
+                pedido_id: pedido.id,
+                fecha: serverTimestamp(),
+              });
+            });
+
+            if (franjaSnap?.exists()) {
+              const actual = franjaSnap.data().total_pedidos ?? 0;
+              if (actual > 0) {
+                tx.update(franjaRef, { total_pedidos: actual - 1, saturado: actual - 1 >= cupo });
+              }
+            }
+          }
 
           const historial = [
             ...(data.historial_estados ?? []),
             { estado: nuevoEstado, fecha: Timestamp.now() },
           ];
-
           tx.update(pedidoRef, {
             estado: nuevoEstado,
             historial_estados: historial,
