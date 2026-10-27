@@ -93,6 +93,11 @@ function OrderCard({ pedido, onAdvance, onCancel, advancing }) {
   const enCurso = pedido.estado !== 'listo';
   const urgente = enCurso && mins > 10;
   const advertencia = enCurso && mins > 5 && mins <= 10;
+  const items = Array.isArray(pedido.items)
+    ? pedido.items
+    : pedido.items && typeof pedido.items === 'object'
+      ? Object.values(pedido.items)
+      : [];
 
   return (
     <div
@@ -111,7 +116,7 @@ function OrderCard({ pedido, onAdvance, onCancel, advancing }) {
       </div>
 
       <ul className="kds-items-list">
-        {(pedido.items ?? []).map((item, idx) => (
+        {items.map((item, idx) => (
           <li key={idx} className="kds-item-row">
             <span className="kds-item-qty">{item.cantidad}×</span>
             <span className="kds-item-name">{item.nombre_producto}</span>
