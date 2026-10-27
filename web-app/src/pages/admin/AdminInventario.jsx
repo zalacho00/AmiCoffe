@@ -9,6 +9,8 @@ import {
   addDoc,
   updateDoc,
   serverTimestamp,
+  orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase/config';
 
@@ -18,6 +20,14 @@ const CATEGORIAS = [
   { id: 'snacks', label: '🥪 Snacks' },
   { id: 'almuerzos', label: '🍽️ Almuerzos' },
 ];
+
+const TIPOS_AUDITORIA = {
+  incremento: '➕ Entrada',
+  decremento: '➖ Salida',
+  venta: '🛒 Venta',
+  cancelacion: '↩️ Cancelación',
+  creacion: '🆕 Creación',
+};
 
 const UMBRAL_BAJO_STOCK = 5; // solo visual, no cambia el campo `estado` en la BD
 
@@ -31,6 +41,7 @@ export default function AdminInventario() {
   const [editingProduct, setEditingProduct] = useState(null); // null = creando nuevo
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  
 
   // ── Escucha en tiempo real de `productos` ──
   useEffect(() => {
@@ -51,10 +62,10 @@ export default function AdminInventario() {
   }, []);
 
   // ── Escucha en tiempo real de `auditoria_inventario` (últimos 20) ──
-  useEffect(() => {
-    const q = query(collection(db, 'auditoria_inventario'), orderBy('fecha', 'desc'));
+    useEffect(() => {
+    const q = query(collection(db, 'auditoria_inventario'), orderBy('fecha', 'desc'), limit(20));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setAuditoriaLogs(snapshot.docs.slice(0, 20).map((d) => ({ id: d.id, ...d.data() })));
+      setAuditoriaLogs(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
     return () => unsubscribe();
   }, []);
@@ -65,37 +76,29 @@ export default function AdminInventario() {
     const adminEmail = auth.currentUser?.email || 'desconocido';
 
     try {
-      let stockAnterior = 0;
-      let stockNuevo = 0;
-
       await runTransaction(db, async (transaction) => {
         const snap = await transaction.get(productoRef);
         if (!snap.exists()) throw new Error('El producto ya no existe.');
 
-        stockAnterior = snap.data().stock;
-        stockNuevo = stockAnterior + delta;
-
-        if (stockNuevo < 0) {
-          throw new Error('El stock no puede quedar negativo.');
-        }
-
-        const nuevoEstado = stockNuevo === 0 ? 'agotado' : 'disponible';
+        const stockAnterior = snap.data().stock;
+        const stockNuevo = stockAnterior + delta;
+        if (stockNuevo < 0) throw new Error('El stock no puede quedar negativo.');
 
         transaction.update(productoRef, {
           stock: stockNuevo,
-          estado: nuevoEstado,
+          estado: stockNuevo === 0 ? 'agotado' : 'disponible',
         });
-      });
 
-      // Registro de auditoría (fuera de la transacción, no crítico si falla)
-      await addDoc(collection(db, 'auditoria_inventario'), {
-        producto_id: producto.id,
-        nombre_producto: producto.nombre,
-        tipo_cambio: delta > 0 ? 'incremento' : 'decremento',
-        stock_anterior: stockAnterior,
-        stock_nuevo: stockNuevo,
-        administrador: adminEmail,
-        fecha: serverTimestamp(),
+        // Auditoría en la MISMA transacción: se guardan las dos cosas o ninguna
+        transaction.set(doc(collection(db, 'auditoria_inventario')), {
+          producto_id: producto.id,
+          nombre_producto: snap.data().nombre ?? producto.nombre,
+          tipo_cambio: delta > 0 ? 'incremento' : 'decremento',
+          stock_anterior: stockAnterior,
+          stock_nuevo: stockNuevo,
+          administrador: adminEmail,
+          fecha: serverTimestamp(),
+        });
       });
     } catch (err) {
       console.error(err);
@@ -113,12 +116,22 @@ export default function AdminInventario() {
           precio: Number(formData.precio),
         });
       } else {
-        await addDoc(collection(db, 'productos'), {
+                const stockInicial = Number(formData.stock) || 0;
+        const nuevoRef = await addDoc(collection(db, 'productos'), {
           nombre: formData.nombre,
           categoria: formData.categoria,
           precio: Number(formData.precio),
-          stock: Number(formData.stock) || 0,
-          estado: Number(formData.stock) > 0 ? 'disponible' : 'agotado',
+          stock: stockInicial,
+          estado: stockInicial > 0 ? 'disponible' : 'agotado',
+        });
+        await addDoc(collection(db, 'auditoria_inventario'), {
+          producto_id: nuevoRef.id,
+          nombre_producto: formData.nombre,
+          tipo_cambio: 'creacion',
+          stock_anterior: 0,
+          stock_nuevo: stockInicial,
+          administrador: auth.currentUser?.email || 'desconocido',
+          fecha: serverTimestamp(),
         });
       }
       setShowFormModal(false);
@@ -306,7 +319,7 @@ export default function AdminInventario() {
                     <th>Tipo</th>
                     <th>Anterior</th>
                     <th>Nuevo</th>
-                    <th>Admin</th>
+                    <th>Origen</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -317,7 +330,7 @@ export default function AdminInventario() {
                     <tr key={log.id}>
                       <td><span style={{ fontSize: '11px' }}>{formatFecha(log.fecha)}</span></td>
                       <td><strong>{log.nombre_producto}</strong></td>
-                      <td><span className="cat-tag">{log.tipo_cambio}</span></td>
+                      <td><span className="cat-tag">{TIPOS_AUDITORIA[log.tipo_cambio] ?? log.tipo_cambio}</span></td>
                       <td>{log.stock_anterior}</td>
                       <td><strong style={{ color: 'var(--funlam-orange)' }}>{log.stock_nuevo}</strong></td>
                       <td><span style={{ fontSize: '11px', color: '#64748b' }}>{log.administrador}</span></td>
