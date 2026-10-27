@@ -3,7 +3,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
+  onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -48,54 +48,46 @@ export default function AdminMetricas() {
   const [errorMsg, setErrorMsg] = useState('');
 
   // ── Cargar pedidos entregados del rango seleccionado ──
-  useEffect(() => {
-    let activo = true;
+    useEffect(() => {
     setLoading(true);
     setErrorMsg('');
 
     const start = getRangeStart(timeRange);
+    const q = query(
+      collection(db, 'pedidos'),
+      where('estado', '==', 'entregado'),
+      where('fecha_creacion', '>=', Timestamp.fromDate(start))
+    );
 
-    async function cargar() {
-      try {
-        const q = query(
-          collection(db, 'pedidos'),
-          where('estado', '==', 'entregado'),
-          where('fecha_creacion', '>=', Timestamp.fromDate(start))
-        );
-        const snap = await getDocs(q);
-        if (!activo) return;
+    // En vivo: cada pedido que cocina marca como entregado actualiza ventas, pedidos y tiempos
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
         setPedidos(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      } catch (err) {
+        setLoading(false);
+      },
+      (err) => {
         console.error(err);
-        if (!activo) return;
-        // Suele pasar la primera vez: falta el índice compuesto (Firestore
-        // te da en la consola del navegador el link directo para crearlo con 1 click).
         setErrorMsg(
-          'No se pudieron cargar las métricas. Si la consola del navegador menciona un índice faltante, usa el link que Firestore ofrece ahí para crearlo (tarda ~1 min en quedar listo).'
+          'No se pudieron cargar las métricas. Si la consola del navegador menciona un índice faltante, usa el link que Firestore ofrece ahí para crearlo.'
         );
-      } finally {
-        if (activo) setLoading(false);
+        setLoading(false);
       }
-    }
-
-    cargar();
-    return () => { activo = false; };
+    );
+    return () => unsubscribe();
   }, [timeRange]);
 
   // ── Cargar horas pico del día actual ──
   useEffect(() => {
-    async function cargarFranjas() {
-      try {
-        const d = new Date();
-        const hoyStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const q = query(collection(db, 'metricas_horas_pico'), where('dia', '==', hoyStr));
-        const snap = await getDocs(q);
-        setFranjasHoy(snap.docs.map((d) => d.data()));
-      } catch (err) {
-        console.error('Error cargando horas pico:', err);
-      }
-    }
-    cargarFranjas();
+    const d = new Date();
+    const hoyStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const q = query(collection(db, 'metricas_horas_pico'), where('dia', '==', hoyStr));
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => setFranjasHoy(snap.docs.map((x) => x.data())),
+      (err) => console.error('Error cargando horas pico:', err)
+    );
+    return () => unsubscribe();
   }, []);
 
   // ── KPIs calculados a partir de pedidos reales ──
