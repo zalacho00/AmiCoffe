@@ -66,3 +66,14 @@ En la carpeta principal del proyecto (afuera de las 3 carpetas grandes) verás u
 *   **`firestore.rules`**: Son las reglas de seguridad. Aquí decidimos quién puede ver o cambiar información (por ejemplo, evitar que alguien que no es admin borre productos).
 *   **`firestore.indexes.json`**: Ayuda a que las búsquedas de información en la base de datos sean súper rápidas.
 *   **`.gitignore`**: Una lista que le dice a GitHub qué archivos **no** debe subir a internet (como contraseñas o archivos muy pesados que se pueden volver a generar).
+
+### vistas
+<img width="250" height="559" alt="menu" src="https://github.com/user-attachments/assets/ac54711f-5e03-41bd-afad-be6c6b1e4a70" />
+
+<img width="250" height="559" alt="carrito" src="https://github.com/user-attachments/assets/e3d7714b-f0cf-4d65-8c61-2cb033be0d91" />
+
+<img width="250" height="559" alt="carritoLleno" src="https://github.com/user-attachments/assets/c03c2ce9-4659-42c7-a6e6-86311e598e26" />
+
+<img width="250" height="559" alt="misPedidos" src="https://github.com/user-attachments/assets/a35571ac-4f4c-4fa4-a82c-dca99e985725" />
+
+
