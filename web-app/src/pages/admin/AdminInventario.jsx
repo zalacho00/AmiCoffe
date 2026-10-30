@@ -9,7 +9,6 @@ import {
   addDoc,
   updateDoc,
   serverTimestamp,
-  orderBy,
   limit,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase/config';
@@ -41,7 +40,6 @@ export default function AdminInventario() {
   const [editingProduct, setEditingProduct] = useState(null); // null = creando nuevo
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  
 
   // ── Escucha en tiempo real de `productos` ──
   useEffect(() => {
@@ -62,7 +60,7 @@ export default function AdminInventario() {
   }, []);
 
   // ── Escucha en tiempo real de `auditoria_inventario` (últimos 20) ──
-    useEffect(() => {
+  useEffect(() => {
     const q = query(collection(db, 'auditoria_inventario'), orderBy('fecha', 'desc'), limit(20));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAuditoriaLogs(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -116,7 +114,7 @@ export default function AdminInventario() {
           precio: Number(formData.precio),
         });
       } else {
-                const stockInicial = Number(formData.stock) || 0;
+        const stockInicial = Number(formData.stock) || 0;
         const nuevoRef = await addDoc(collection(db, 'productos'), {
           nombre: formData.nombre,
           categoria: formData.categoria,
@@ -163,6 +161,7 @@ export default function AdminInventario() {
 
   return (
     <div className="admin-page">
+      {/* ── M3 Header ── */}
       <div className="page-header-title">
         <div>
           <h2>Gestión de Inventario en Tiempo Real</h2>
@@ -170,10 +169,12 @@ export default function AdminInventario() {
             Los productos con stock 0 se marcan como <strong>Agotado</strong> y se ocultan automáticamente en la app de los estudiantes.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {/* M3 Outlined Button */}
           <button className="btn-audit" onClick={() => setShowAuditoriaModal(true)}>
             📋 Historial de Auditoría
           </button>
+          {/* M3 Filled Button */}
           <button
             className="btn-primary btn-new-product"
             onClick={() => { setEditingProduct(null); setShowFormModal(true); }}
@@ -185,34 +186,37 @@ export default function AdminInventario() {
 
       {errorMsg && <div className="auth-error-alert">{errorMsg}</div>}
 
-      {/* Categorías */}
-      <div className="category-pills-scroll">
+      {/* ── M3 Filter Chips (Categorías) ── */}
+      <div className="category-pills-scroll" role="tablist" aria-label="Categorías de productos">
         {CATEGORIAS.map((cat) => (
           <button
             key={cat.id}
             className={`category-pill ${activeCategory === cat.id ? 'active' : ''}`}
             onClick={() => setActiveCategory(cat.id)}
+            role="tab"
+            aria-selected={activeCategory === cat.id}
           >
-            {cat.label}
+            <span>{cat.label}</span>
             <span className="pill-badge">{countByCategory(cat.id)}</span>
           </button>
         ))}
       </div>
 
-      {/* Búsqueda */}
+      {/* ── M3 Search Bar ── */}
       <div className="search-filter-bar">
         <div className="search-input-wrapper">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" aria-hidden="true">🔍</span>
           <input
             type="text"
             placeholder="Buscar producto por nombre..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Buscar producto por nombre"
           />
         </div>
       </div>
 
-      {/* Tabla */}
+      {/* ── M3 Outlined Table Card ── */}
       <div className="table-card">
         <table className="admin-table">
           <thead>
@@ -222,13 +226,13 @@ export default function AdminInventario() {
               <th>Precio (COP)</th>
               <th>Control Stock</th>
               <th>Estado & Visibilidad App</th>
-              <th>Acciones</th>
+              <th style={{ textAlign: 'center' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '24px' }}>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--md-sys-color-on-surface-variant)' }}>
                   No hay productos en esta categoría todavía.
                 </td>
               </tr>
@@ -242,7 +246,7 @@ export default function AdminInventario() {
                       <div className="product-mini-icon">☕</div>
                       <div>
                         <strong className="product-item-name">{product.nombre}</strong>
-                        <span style={{ display: 'block', fontSize: '11px', color: '#94a3b8' }}>
+                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--md-sys-color-on-surface-variant)', opacity: 0.8 }}>
                           ID: {product.id}
                         </span>
                       </div>
@@ -253,23 +257,36 @@ export default function AdminInventario() {
                       {CATEGORIAS.find((c) => c.id === product.categoria)?.label || product.categoria}
                     </span>
                   </td>
-                  <td><strong>${Number(product.precio).toLocaleString('es-CO')} COP</strong></td>
                   <td>
+                    <strong style={{ color: 'var(--md-sys-color-on-surface)' }}>
+                      ${Number(product.precio).toLocaleString('es-CO')} COP
+                    </strong>
+                  </td>
+                  <td>
+                    {/* M3 Filled Tonal Stepper */}
                     <div className="stock-controls">
                       <button
                         className="stock-btn"
                         onClick={() => handleStockChange(product, -1)}
                         disabled={product.stock <= 0}
+                        title="Disminuir stock"
+                        aria-label="Disminuir stock"
                       >
                         -
                       </button>
                       <span className="stock-number">{product.stock} u.</span>
-                      <button className="stock-btn" onClick={() => handleStockChange(product, 1)}>
+                      <button
+                        className="stock-btn"
+                        onClick={() => handleStockChange(product, 1)}
+                        title="Aumentar stock"
+                        aria-label="Aumentar stock"
+                      >
                         +
                       </button>
                     </div>
                   </td>
                   <td>
+                    {/* M3 Status Badge */}
                     <span
                       className={`status-badge ${
                         product.estado === 'agotado' ? 'agotado' : bajoStock ? 'bajo-stock' : 'disponible'
@@ -278,15 +295,17 @@ export default function AdminInventario() {
                       {product.estado === 'agotado' ? 'Agotado' : bajoStock ? 'Bajo Stock' : 'Disponible'}
                     </span>
                     {product.estado === 'agotado' && (
-                      <span style={{ display: 'block', fontSize: '10px', color: '#ef4444', marginTop: '2px', fontWeight: 'bold' }}>
+                      <span style={{ display: 'block', fontSize: '10.5px', color: 'var(--md-sys-color-error)', marginTop: '4px', fontWeight: '700' }}>
                         🚫 Oculto en App Estudiante
                       </span>
                     )}
                   </td>
-                  <td>
+                  <td style={{ textAlign: 'center' }}>
+                    {/* M3 Icon Button */}
                     <button
                       className="btn-icon"
-                      title="Editar"
+                      title="Editar producto"
+                      aria-label={`Editar ${product.nombre}`}
                       onClick={() => { setEditingProduct(product); setShowFormModal(true); }}
                     >
                       ✏️
@@ -299,18 +318,36 @@ export default function AdminInventario() {
         </table>
       </div>
 
-      {/* Modal de auditoría */}
+      {/* ── M3 Dialog de Auditoría ── */}
       {showAuditoriaModal && (
         <div className="auth-overlay" onClick={() => setShowAuditoriaModal(false)}>
-          <div className="auth-card" style={{ maxWidth: '650px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="auth-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div
+            className="auth-card"
+            style={{ maxWidth: '680px' }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auditoria-dialog-title"
+          >
+            <div className="auth-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left' }}>
               <div>
-                <h3 style={{ color: '#fff', fontSize: '20px' }}>Historial auditoria_inventario</h3>
-                <span style={{ fontSize: '11px', color: '#ffedd5' }}>Últimos 20 cambios registrados</span>
+                <h3 id="auditoria-dialog-title" style={{ color: '#ffffff', fontSize: '20px', fontWeight: 800 }}>
+                  Historial auditoria_inventario
+                </h3>
+                <span style={{ fontSize: '12px', color: 'var(--md-sys-color-primary-container)', fontWeight: 600 }}>
+                  Últimos 20 cambios registrados
+                </span>
               </div>
-              <button onClick={() => setShowAuditoriaModal(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' }}>✖</button>
+              <button
+                onClick={() => setShowAuditoriaModal(false)}
+                className="btn-icon"
+                style={{ color: '#ffffff', fontSize: '18px' }}
+                aria-label="Cerrar modal"
+              >
+                ✖
+              </button>
             </div>
-            <div className="auth-body">
+            <div className="auth-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
               <table className="admin-table">
                 <thead>
                   <tr>
@@ -324,16 +361,20 @@ export default function AdminInventario() {
                 </thead>
                 <tbody>
                   {auditoriaLogs.length === 0 && (
-                    <tr><td colSpan={6} style={{ textAlign: 'center' }}>Sin movimientos todavía.</td></tr>
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '24px', color: 'var(--md-sys-color-on-surface-variant)' }}>
+                        Sin movimientos todavía.
+                      </td>
+                    </tr>
                   )}
                   {auditoriaLogs.map((log) => (
                     <tr key={log.id}>
-                      <td><span style={{ fontSize: '11px' }}>{formatFecha(log.fecha)}</span></td>
+                      <td><span style={{ fontSize: '11.5px', color: 'var(--md-sys-color-on-surface-variant)' }}>{formatFecha(log.fecha)}</span></td>
                       <td><strong>{log.nombre_producto}</strong></td>
                       <td><span className="cat-tag">{TIPOS_AUDITORIA[log.tipo_cambio] ?? log.tipo_cambio}</span></td>
                       <td>{log.stock_anterior}</td>
-                      <td><strong style={{ color: 'var(--funlam-orange)' }}>{log.stock_nuevo}</strong></td>
-                      <td><span style={{ fontSize: '11px', color: '#64748b' }}>{log.administrador}</span></td>
+                      <td><strong style={{ color: 'var(--md-sys-color-primary)' }}>{log.stock_nuevo}</strong></td>
+                      <td><span style={{ fontSize: '11.5px', color: 'var(--md-sys-color-on-surface-variant)' }}>{log.administrador}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -343,7 +384,7 @@ export default function AdminInventario() {
         </div>
       )}
 
-      {/* Modal de crear/editar producto */}
+      {/* ── M3 Dialog de Crear/Editar Producto ── */}
       {showFormModal && (
         <ProductFormModal
           initialData={editingProduct}
@@ -372,32 +413,67 @@ function ProductFormModal({ initialData, onClose, onSave }) {
 
   return (
     <div className="auth-overlay" onClick={onClose}>
-      <div className="auth-card" style={{ maxWidth: '420px' }} onClick={(e) => e.stopPropagation()}>
+      <div
+        className="auth-card"
+        style={{ maxWidth: '440px' }}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="product-dialog-title"
+      >
         <div className="auth-header">
-          <h3 style={{ color: '#fff' }}>{initialData ? 'Editar producto' : 'Nuevo producto'}</h3>
+          <h3 id="product-dialog-title" style={{ color: '#ffffff', fontSize: '20px', fontWeight: 800 }}>
+            {initialData ? 'Editar producto' : 'Nuevo producto'}
+          </h3>
+          <span className="auth-subtitle">CATÁLOGO CAMPUS VIBE</span>
         </div>
         <div className="auth-body">
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label>Nombre</label>
-              <input value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+              <label htmlFor="product-name">Nombre</label>
+              <input
+                id="product-name"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Ej. Café Espresso"
+                required
+              />
             </div>
             <div className="form-group">
-              <label>Categoría</label>
-              <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+              <label htmlFor="product-cat">Categoría</label>
+              <select
+                id="product-cat"
+                value={categoria}
+                onChange={(e) => setCategoria(e.target.value)}
+              >
                 <option value="bebidas">Bebidas</option>
                 <option value="snacks">Snacks</option>
                 <option value="almuerzos">Almuerzos</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Precio (COP)</label>
-              <input type="number" min="0" value={precio} onChange={(e) => setPrecio(e.target.value)} required />
+              <label htmlFor="product-price">Precio (COP)</label>
+              <input
+                id="product-price"
+                type="number"
+                min="0"
+                value={precio}
+                onChange={(e) => setPrecio(e.target.value)}
+                placeholder="Ej. 4500"
+                required
+              />
             </div>
             {!initialData && (
               <div className="form-group">
-                <label>Stock inicial</label>
-                <input type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} />
+                <label htmlFor="product-stock">Stock inicial</label>
+                <input
+                  id="product-stock"
+                  type="number"
+                  min="0"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="0"
+                />
               </div>
             )}
             <button type="submit" className="auth-submit-btn" disabled={saving}>

@@ -1,114 +1,126 @@
-/* ═══════════════════════════════════════════
-   KDS Panel — HU-05 · Pantalla de Cocina
-   ═══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   KDS Panel — Material Design 3 (Material You) Kitchen Board
+   ══════════════════════════════════════════════════════════════ */
 
 /* ── Root ── */
 .kds-root {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-/* ── Loader ── */
+/* ── M3 Loader ── */
 .kds-loader {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 64px 32px;
-  color: var(--text-muted);
+  padding: 80px 32px;
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 14px;
+  font-weight: 600;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
 .kds-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-color);
-  border-top-color: var(--funlam-orange);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  width: 36px;
+  height: 36px;
+  border: 3.5px solid var(--md-sys-color-outline-variant);
+  border-top-color: var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-corner-full);
+  animation: spin 0.8s var(--md-sys-motion-easing-standard) infinite;
 }
 
-/* ── Barra de estado live ── */
+/* ── M3 Live Status Bar (Elevated Surface Container) ── */
 .kds-statusbar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 8px 14px;
-  font-size: 12px;
-  box-shadow: var(--shadow-sm);
+  gap: 12px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 12px 20px;
+  font-size: 12.5px;
+  box-shadow: var(--md-sys-elevation-1);
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.5; transform: scale(0.85); }
 }
+
 .kds-live-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--md-sys-shape-corner-full);
   flex-shrink: 0;
 }
+
 .kds-live-dot.live-ok {
   background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
   animation: pulse-dot 1.8s ease-in-out infinite;
 }
+
 .kds-live-dot.live-err {
-  background: #ef4444;
+  background: var(--md-sys-color-error);
+  box-shadow: 0 0 0 3px rgba(186, 26, 26, 0.25);
 }
 
 .kds-live-label {
-  font-weight: 700;
-  color: var(--text-main);
+  font-weight: 800;
+  color: var(--md-sys-color-on-surface);
 }
 
 .kds-last-update {
-  color: var(--text-muted);
+  color: var(--md-sys-color-on-surface-variant);
   margin-left: 4px;
+  font-weight: 500;
 }
 
 .kds-total-badge {
   margin-left: auto;
-  background: var(--funlam-blue);
-  color: #fff;
-  font-size: 11px;
+  background: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+  font-size: 11.5px;
   font-weight: 800;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
+  padding: 4px 14px;
+  border-radius: var(--md-sys-shape-corner-full);
   letter-spacing: 0.3px;
+  box-shadow: var(--md-sys-elevation-1);
 }
 
-/* ── Alertas ── */
+/* ── M3 Alerts ── */
 .kds-alert {
-  padding: 11px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
+  padding: 14px 18px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  font-size: 13.5px;
   font-weight: 600;
   border: 1px solid transparent;
-}
-.kds-alert--error {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #991b1b;
-}
-.kds-alert--info {
-  background: #fff7ed;
-  border-color: #fdba74;
-  color: #9a3412;
+  box-shadow: var(--md-sys-elevation-1);
 }
 
-/* ── Tablero ── */
+.kds-alert--error {
+  background: var(--md-sys-color-error-container);
+  border-color: rgba(186, 26, 26, 0.25);
+  color: var(--md-sys-color-on-error-container);
+}
+
+.kds-alert--info {
+  background: var(--md-sys-color-warning-container);
+  border-color: rgba(180, 83, 9, 0.25);
+  color: var(--md-sys-color-on-warning-container);
+}
+
+/* ── M3 Kanban Board ── */
 .kds-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  gap: 20px;
   align-items: start;
 }
 
@@ -116,313 +128,373 @@
   .kds-board { grid-template-columns: 1fr; }
 }
 
-/* ── Columnas ── */
+/* ── M3 Board Columns (Tonal Surface Containers) ── */
 .kds-column {
-  border-radius: var(--radius-md);
-  padding: 16px;
-  min-height: 260px;
-  border: 1px solid var(--border-color);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 18px;
+  min-height: 300px;
+  border: 1.5px solid var(--md-sys-color-outline-variant);
+  transition: all 0.2s ease;
 }
 
 .col-espera {
   background: #fefce8;
-  border-color: #fde047;
-}
-.col-prep {
-  background: #fff7ed;
-  border-color: #fb923c;
+  border-color: #fef08a;
 }
 
-/* Cabecera columna */
+.col-prep {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.col-listo {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+/* Column Header */
 .kds-col-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .kds-col-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .kds-col-emoji {
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
 }
 
 .kds-col-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.2px;
+  color: var(--md-sys-color-on-surface);
+  letter-spacing: -0.015em;
 }
 
+/* M3 Badge for column counter */
 .kds-col-count {
   font-size: 12px;
   font-weight: 800;
-  padding: 2px 10px;
-  border-radius: var(--radius-full);
-  min-width: 26px;
+  padding: 3px 12px;
+  border-radius: var(--md-sys-shape-corner-full);
+  min-width: 28px;
   text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
+
 .badge-espera {
   background: #fef08a;
   color: #713f12;
   border: 1px solid #fde047;
 }
+
 .badge-prep {
   background: #fed7aa;
   color: #7c2d12;
   border: 1px solid #fb923c;
 }
 
-/* Cuerpo columna */
+.badge-listo {
+  background: #bbf7d0;
+  color: #14532d;
+  border: 1px solid #86efac;
+}
+
+/* Column Body */
 .kds-col-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .kds-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 28px 0;
-  color: var(--text-light);
-  font-size: 13px;
-}
-.kds-empty-icon {
-  font-size: 22px;
+  gap: 8px;
+  padding: 36px 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
-/* ── Tarjeta pedido ── */
+.kds-empty-icon {
+  font-size: 26px;
+  opacity: 0.85;
+}
+
+/* ── M3 Order Card (Elevated Card) ── */
 @keyframes pulse-urgente {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
-  50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(186, 26, 26, 0); }
 }
 
 .kds-card {
-  background: #ffffff;
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  box-shadow: var(--shadow-sm);
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1.5px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 16px;
+  box-shadow: var(--md-sys-elevation-1);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  gap: 12px;
+  transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
+
 .kds-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: var(--md-sys-elevation-2);
+  border-color: var(--md-sys-color-outline);
 }
+
 .kds-card--advertencia {
   border-color: #f59e0b;
-  background: #fffbeb;
+  background: #fffdf5;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
 }
+
 .kds-card--urgente {
-  border-color: #ef4444;
-  background: #fef2f2;
+  border-color: var(--md-sys-color-error);
+  background: #fff5f5;
   animation: pulse-urgente 2s ease-in-out infinite;
 }
 
-/* Header tarjeta */
+/* Card Header */
 .kds-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 .kds-card-code {
   font-weight: 900;
-  font-size: 15px;
-  color: var(--funlam-blue);
-  letter-spacing: -0.3px;
+  font-size: 16px;
+  color: var(--md-sys-color-secondary);
+  letter-spacing: -0.02em;
 }
+
+/* M3 Timer Badge */
 .kds-card-timer {
   font-size: 12px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
-  background: var(--bg-subtle);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-color);
-  min-width: 44px;
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container);
+  padding: 3px 10px;
+  border-radius: var(--md-sys-shape-corner-full);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  min-width: 50px;
   text-align: center;
 }
+
 .timer-advertencia {
-  color: #92400e;
-  background: #fef3c7;
-  border-color: #f59e0b;
-}
-.timer-urgente {
-  color: #991b1b;
-  background: #fee2e2;
-  border-color: #ef4444;
+  color: #78350f;
+  background: var(--md-sys-color-warning-container);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
-/* Meta (hora + estudiante) */
+.timer-urgente {
+  color: var(--md-sys-color-on-error-container);
+  background: var(--md-sys-color-error-container);
+  border-color: rgba(186, 26, 26, 0.3);
+}
+
+/* Card Meta */
 .kds-card-meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-.kds-card-hora {
-  font-size: 11px;
-  color: var(--text-light);
-  font-weight: 600;
-}
-.kds-card-student {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-main);
+  gap: 3px;
 }
 
-/* Items */
+.kds-card-hora {
+  font-size: 11.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 600;
+}
+
+.kds-card-student {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Items List */
 .kds-items-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  border-top: 1px dashed var(--border-color);
-  padding-top: 8px;
+  gap: 6px;
+  border-top: 1px dashed var(--md-sys-color-outline-variant);
+  padding-top: 10px;
 }
+
 .kds-item-row {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 13.5px;
 }
+
 .kds-item-qty {
   font-weight: 900;
-  color: var(--funlam-orange);
-  min-width: 26px;
-  font-size: 13px;
+  color: var(--md-sys-color-primary);
+  min-width: 28px;
+  font-size: 13.5px;
 }
+
 .kds-item-name {
-  color: var(--text-main);
+  color: var(--md-sys-color-on-surface);
   font-weight: 600;
 }
+
 .kds-item-nota {
-  color: var(--text-muted);
-  font-size: 11.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
   font-style: italic;
 }
 
-/* Botón de avance */
+/* ── M3 Advance Buttons (Filled Buttons) ── */
 .kds-btn-advance {
   width: 100%;
-  padding: 10px 16px;
+  height: 42px;
+  padding: 0 18px;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: 13.5px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s;
-  margin-top: 2px;
+  gap: 8px;
+  transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  margin-top: 4px;
   letter-spacing: 0.1px;
+  font-family: inherit;
+  box-shadow: var(--md-sys-elevation-1);
 }
+
 .kds-btn-advance:hover:not(:disabled) {
-  transform: scale(1.01);
+  box-shadow: var(--md-sys-elevation-2);
+  transform: translateY(-1px);
 }
+
 .kds-btn-advance:active:not(:disabled) {
-  transform: scale(0.99);
+  box-shadow: var(--md-sys-elevation-1);
+  transform: translateY(0);
 }
+
 .kds-btn-advance:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
+
 .btn-start {
-  background: var(--funlam-orange);
-  color: #ffffff;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
 }
+
 .btn-start:hover:not(:disabled) {
-  background: var(--funlam-orange-hover);
+  background: var(--md-sys-color-primary-hover);
 }
+
 .btn-ready {
-  background: var(--funlam-blue);
-  color: #ffffff;
+  background: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
 }
+
 .btn-ready:hover:not(:disabled) {
   background: #1e293b;
 }
-.btn-arrow {
-  font-size: 14px;
+
+.btn-deliver {
+  background: var(--md-sys-color-success);
+  color: var(--md-sys-color-on-success);
 }
 
-/* Spinner inline */
+.btn-deliver:hover:not(:disabled) {
+  background: #166534;
+}
+
+.btn-arrow {
+  font-size: 15px;
+  transition: transform 0.2s ease;
+}
+
+.kds-btn-advance:hover:not(:disabled) .btn-arrow {
+  transform: translateX(3px);
+}
+
+/* Inline Spinner */
 @keyframes spin-inline {
   to { transform: rotate(360deg); }
 }
+
 .btn-spinner {
   display: inline-block;
-  width: 15px;
-  height: 15px;
-  border: 2px solid rgba(255,255,255,0.4);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
   border-top-color: #ffffff;
-  border-radius: 50%;
+  border-radius: var(--md-sys-shape-corner-full);
   animation: spin-inline 0.6s linear infinite;
 }
 
-/* ── Nota técnica HU-05 ── */
-.kds-footnote {
-  font-size: 11px;
-  color: var(--text-light);
-  border-top: 1px solid var(--border-color);
-  padding-top: 12px;
-  line-height: 1.6;
-}
-.kds-footnote code {
-  font-family: 'Fira Code', 'Cascadia Code', monospace;
-  font-size: 10.5px;
-  background: var(--bg-subtle);
-  padding: 1px 5px;
-  border-radius: 4px;
-  color: var(--funlam-navy);
-}
-
-.col-listo {
-  background: #f0fdf4;
-  border-color: #86efac;
-}
-.badge-listo {
-  background: #bbf7d0;
-  color: #14532d;
-  border: 1px solid #86efac;
-}
-.btn-deliver {
-  background: #16a34a;
-  color: #ffffff;
-}
-.btn-deliver:hover:not(:disabled) {
-  background: #15803d;
-}
+/* ── M3 Cancel Button (Outlined Button) ── */
 .kds-btn-cancel {
   width: 100%;
-  margin-top: 6px;
-  padding: 7px 12px;
+  margin-top: 4px;
+  height: 36px;
+  padding: 0 14px;
   background: transparent;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+  color: var(--md-sys-color-error);
+  border: 1.5px solid var(--md-sys-color-error-container);
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all var(--md-sys-motion-duration-short) ease;
+  font-family: inherit;
 }
+
 .kds-btn-cancel:hover:not(:disabled) {
-  background: #fef2f2;
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+  border-color: var(--md-sys-color-error);
 }
+
 .kds-btn-cancel:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ── M3 Footnote / Caption ── */
+.kds-footnote {
+  font-size: 11.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  padding-top: 14px;
+  line-height: 1.6;
+}
+
+.kds-footnote code {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 11px;
+  background: var(--md-sys-color-surface-container);
+  padding: 2px 6px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  color: var(--md-sys-color-tertiary);
 }

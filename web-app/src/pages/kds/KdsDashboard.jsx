@@ -62,7 +62,7 @@ export default function KdsDashboard() {
   };
 
   if (checkingAuth) {
-    return <div className="admin-root">Cargando…</div>;
+    return <div className="admin-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando KDS…</div>;
   }
 
   return (
@@ -77,6 +77,7 @@ export default function KdsDashboard() {
       )}
 
       <div className="admin-container">
+        {/* ── M3 Navigation Drawer ── */}
         <aside className="admin-sidebar">
           <div className="sidebar-brand">
             <img src="/amicoffe-logo.png" alt="AmiCoffe Logo" width="40" height="40" className="brand-logo-img" />
@@ -115,13 +116,14 @@ export default function KdsDashboard() {
               <span className="user-role">{currentUser ? currentUser.role : '—'}</span>
             </div>
             {currentUser && (
-              <button className="logout-btn" onClick={handleLogout} title="Cerrar Sesión">
+              <button className="logout-btn" onClick={handleLogout} title="Cerrar Sesión" aria-label="Cerrar Sesión">
                 <IconLogOut />
               </button>
             )}
           </div>
         </aside>
 
+        {/* ── M3 Main Content ── */}
         <main className="admin-main">
           <header className="admin-topbar">
             <div className="topbar-title-section">

@@ -1,38 +1,126 @@
 :root {
-  /* Paleta Institucional Universidad Católica Luis Amigó (Funlam) + Starbucks Modern Clean Aesthetic */
-  --funlam-orange: #ea580c;         /* Naranja amigoniano primario */
-  --funlam-orange-hover: #c2410c;   
-  --funlam-blue: #0f172a;           /* Azul oscuro/marino profundo institucional */
-  --funlam-blue-sidebar: #0f172a;   /* Sidebar sobrio */
-  --funlam-navy: #1e3a8a;           /* Azul acento */
-  
-  --bg-main: #f8fafc;               /* Fondo general limpio */
-  --bg-card: #ffffff;
-  --bg-subtle: #f1f5f9;
-  
-  --accent-orange-light: #fff7ed;
-  --accent-orange-border: #ffedd5;
-  --accent-blue-light: #f0fdf4;
-  --accent-blue-border: #bbf7d0;
-  
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
-  --border-color: #e2e8f0;
-  
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
-  /* Bordes sutiles y elegantes estilo Starbucks/Dashboard Profesional (menos redondeados) */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-full: 9999px;
+  /* ══════════════════════════════════════════════════════════
+     MATERIAL DESIGN 3 (MATERIAL YOU) — DYNAMIC COLOR TOKENS
+     Base Palette: Funlam Orange (#ea580c) & Slate/Navy (#0f172a, #1e3a8a)
+     ══════════════════════════════════════════════════════════ */
 
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text-main);
-  background-color: var(--bg-main);
+  /* ── M3 Primary Tonal Palette (Funlam Orange) ── */
+  --md-sys-color-primary: #ea580c;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffede5;
+  --md-sys-color-on-primary-container: #3d1200;
+  --md-sys-color-primary-hover: #c2410c;
+
+  /* ── M3 Secondary Tonal Palette (Institutional Slate Navy) ── */
+  --md-sys-color-secondary: #0f172a;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #e2e8f0;
+  --md-sys-color-on-secondary-container: #0f172a;
+
+  /* ── M3 Tertiary Tonal Palette (Accent Navy / Funlam Royal Blue) ── */
+  --md-sys-color-tertiary: #1e3a8a;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #dbeafe;
+  --md-sys-color-on-tertiary-container: #172554;
+
+  /* ── M3 Error Tonal Palette ── */
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+
+  /* ── M3 Success Tonal Palette ── */
+  --md-sys-color-success: #15803d;
+  --md-sys-color-on-success: #ffffff;
+  --md-sys-color-success-container: #dcfce7;
+  --md-sys-color-on-success-container: #14532d;
+
+  /* ── M3 Warning / Attention Tonal Palette ── */
+  --md-sys-color-warning: #b45309;
+  --md-sys-color-on-warning: #ffffff;
+  --md-sys-color-warning-container: #fef3c7;
+  --md-sys-color-on-warning-container: #78350f;
+
+  /* ── M3 Surface & Background Roles ── */
+  --md-sys-color-surface: #fbf9f8;
+  --md-sys-color-surface-dim: #ded8d5;
+  --md-sys-color-surface-bright: #ffffff;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f8f6f4;
+  --md-sys-color-surface-container: #f1ede9;
+  --md-sys-color-surface-container-high: #eae5e0;
+  --md-sys-color-surface-container-highest: #e3ded8;
+  --md-sys-color-on-surface: #1d1b1a;
+  --md-sys-color-on-surface-variant: #475569;
+  --md-sys-color-outline: #cbd5e1;
+  --md-sys-color-outline-variant: #e2e8f0;
+  --md-sys-color-scrim: rgba(15, 23, 42, 0.45);
+
+  /* ── M3 Surface Elevation Shadows ── */
+  --md-sys-elevation-0: none;
+  --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.07), 0px 1px 2px 0px rgba(0, 0, 0, 0.10);
+  --md-sys-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.07), 0px 1px 2px 0px rgba(0, 0, 0, 0.10);
+  --md-sys-elevation-3: 0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 4px 8px 3px rgba(0, 0, 0, 0.08);
+  --md-sys-elevation-4: 0px 2px 3px 0px rgba(0, 0, 0, 0.12), 0px 6px 10px 4px rgba(0, 0, 0, 0.08);
+  --md-sys-elevation-5: 0px 4px 4px 0px rgba(0, 0, 0, 0.12), 0px 8px 12px 6px rgba(0, 0, 0, 0.08);
+
+  /* ── M3 Shape Corner Tokens ── */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* ── M3 State Layer Tokens ── */
+  --md-sys-state-hover-on-surface: rgba(29, 27, 26, 0.08);
+  --md-sys-state-pressed-on-surface: rgba(29, 27, 26, 0.12);
+  --md-sys-state-focus-on-surface: rgba(29, 27, 26, 0.12);
+  --md-sys-state-hover-on-primary: rgba(255, 255, 255, 0.12);
+  --md-sys-state-pressed-on-primary: rgba(255, 255, 255, 0.18);
+
+  /* ── M3 Motion Easing ── */
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 350ms;
+
+  /* ── Aliases para retrocompatibilidad ── */
+  --funlam-orange: var(--md-sys-color-primary);
+  --funlam-orange-hover: var(--md-sys-color-primary-hover);
+  --funlam-blue: var(--md-sys-color-secondary);
+  --funlam-blue-sidebar: var(--md-sys-color-secondary);
+  --funlam-navy: var(--md-sys-color-tertiary);
+  
+  --bg-main: var(--md-sys-color-surface);
+  --bg-card: var(--md-sys-color-surface-container-lowest);
+  --bg-subtle: var(--md-sys-color-surface-container-low);
+  
+  --accent-orange-light: var(--md-sys-color-primary-container);
+  --accent-orange-border: rgba(234, 88, 12, 0.25);
+  --accent-blue-light: var(--md-sys-color-tertiary-container);
+  --accent-blue-border: rgba(30, 58, 138, 0.25);
+  
+  --text-main: var(--md-sys-color-on-surface);
+  --text-muted: var(--md-sys-color-on-surface-variant);
+  --text-light: #94a3b8;
+  --border-color: var(--md-sys-color-outline-variant);
+  
+  --shadow-sm: var(--md-sys-elevation-1);
+  --shadow-md: var(--md-sys-elevation-2);
+  --shadow-lg: var(--md-sys-elevation-3);
+  
+  --radius-sm: var(--md-sys-shape-corner-small);
+  --radius-md: var(--md-sys-shape-corner-medium);
+  --radius-lg: var(--md-sys-shape-corner-large);
+  --radius-full: var(--md-sys-shape-corner-full);
+
+  /* Typography */
+  font-family: 'Plus Jakarta Sans', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--md-sys-color-on-surface);
+  background-color: var(--md-sys-color-surface);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -45,7 +133,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg-main);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
 }
 
 #root {
@@ -54,21 +143,22 @@ body {
 }
 
 h1, h2, h3, h4, .brand-font {
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Outfit', 'Plus Jakarta Sans', Roboto, sans-serif;
+  letter-spacing: -0.015em;
 }
 
-/* Custom Scrollbar */
+/* Material 3 Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--md-sys-color-outline);
 }

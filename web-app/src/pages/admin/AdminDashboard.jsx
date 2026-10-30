@@ -7,11 +7,9 @@ import './AdminDashboard.css';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 
-
-
-/* ── SVG Icon Components (Lucide-style) ── */
+/* ── SVG Icon Components (Material / Lucide Clean Aesthetics) ── */
 const IconBox = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
     <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
     <line x1="12" y1="22.08" x2="12" y2="12" />
@@ -19,7 +17,7 @@ const IconBox = () => (
 );
 
 const IconBarChart = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <line x1="18" y1="20" x2="18" y2="10" />
     <line x1="12" y1="20" x2="12" y2="4" />
     <line x1="6" y1="20" x2="6" y2="14" />
@@ -27,14 +25,14 @@ const IconBarChart = () => (
 );
 
 const IconClock = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="10" />
     <polyline points="12 6 12 12 16 14" />
   </svg>
 );
 
 const IconLogOut = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
     <polyline points="16 17 21 12 16 7" />
     <line x1="21" y1="12" x2="9" y2="12" />
@@ -42,14 +40,14 @@ const IconLogOut = () => (
 );
 
 const IconUser = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
 const IconShoppingBag = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
     <line x1="3" y1="6" x2="21" y2="6" />
     <path d="M16 10a4 4 0 0 1-8 0" />
@@ -57,7 +55,7 @@ const IconShoppingBag = () => (
 );
 
 const IconMapPin = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
     <circle cx="12" cy="10" r="3" />
   </svg>
@@ -106,7 +104,7 @@ export default function AdminDashboard() {
   };
 
   if (checkingAuth) {
-    return <div className="admin-root">Cargando…</div>;
+    return <div className="admin-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando…</div>;
   }
 
   return (
@@ -116,8 +114,8 @@ export default function AdminDashboard() {
       )}
 
       <div className="admin-container">
-        {/* ── Sidebar ── */}
-        <aside className="admin-sidebar">
+        {/* ── M3 Navigation Drawer ── */}
+        <aside className="admin-sidebar" aria-label="Navegación principal">
           {/* Brand */}
           <div className="sidebar-brand">
             <img src="/amicoffe-logo.png" alt="AmiCoffe Logo" width="40" height="40" className="brand-logo-img" />
@@ -131,22 +129,24 @@ export default function AdminDashboard() {
           <p className="sidebar-nav-label">MENÚ PRINCIPAL</p>
 
           {/* Navigation */}
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" role="tablist">
             {navItems.map(({ id, label, sub, Icon }) => (
               <button
                 key={id}
                 className={`nav-item ${activeTab === id ? 'active' : ''}`}
                 onClick={() => setActiveTab(id)}
+                role="tab"
+                aria-selected={activeTab === id}
               >
                 <span className="nav-icon-svg"><Icon /></span>
                 <span className="nav-text">
                   <span className="nav-label">{label}</span>
                   <span className="nav-sub">{sub}</span>
                 </span>
-                {activeTab === id && <span className="nav-active-dot" />}
+                {activeTab === id && <span className="nav-active-dot" aria-hidden="true" />}
               </button>
             ))}
-            <a href="/kds" className="nav-item" style={{ textDecoration: 'none' }}>
+            <a href="/kds" className="nav-item" style={{ textDecoration: 'none' }} title="Ir a KDS Cocina">
               <span className="nav-icon-svg"><IconShoppingBag /></span>
               <span className="nav-text">
                 <span className="nav-label">KDS Cocina</span>
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
 
           {/* User footer */}
           <div className="sidebar-user-footer">
-            <div className="user-avatar-circle">
+            <div className="user-avatar-circle" aria-hidden="true">
               <IconUser />
             </div>
             <div className="user-details">
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
               <span className="user-role">{currentUser ? currentUser.role : '—'}</span>
             </div>
             {currentUser && (
-              <button className="logout-btn" onClick={handleLogout} title="Cerrar Sesión">
+              <button className="logout-btn" onClick={handleLogout} title="Cerrar Sesión" aria-label="Cerrar Sesión">
                 <IconLogOut />
               </button>
             )}
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
 
         {/* ── Main content ── */}
         <main className="admin-main">
-          {/* Topbar */}
+          {/* M3 Top App Bar */}
           <header className="admin-topbar">
             <div className="topbar-title-section">
               <span className="location-pill">

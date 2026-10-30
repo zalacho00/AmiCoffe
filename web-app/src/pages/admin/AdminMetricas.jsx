@@ -48,7 +48,7 @@ export default function AdminMetricas() {
   const [errorMsg, setErrorMsg] = useState('');
 
   // ── Cargar pedidos entregados del rango seleccionado ──
-    useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     setErrorMsg('');
 
@@ -165,16 +165,22 @@ export default function AdminMetricas() {
 
   return (
     <div className="admin-page">
+      {/* ── M3 Elevated Banner Card ── */}
       <div className="campus-vibe-banner">
         <div className="banner-info">
           <div className="status-pill">
-            <span className="live-dot"></span> Métricas en vivo — HU-09
+            <span className="live-dot" aria-hidden="true"></span> Métricas en vivo — HU-09
           </div>
           <h2>¡Hola, Administrador! 👋</h2>
           <p>Aquí tienes el pulso en vivo del Campus Vibe de AmiCoffee.</p>
         </div>
         <div className="banner-controls">
-          <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} className="select-input">
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="select-input"
+            aria-label="Seleccionar rango de tiempo"
+          >
             <option value="hoy">Hoy (Campus Vibe)</option>
             <option value="semana">Esta Semana</option>
             <option value="mes">Este Mes</option>
@@ -185,13 +191,16 @@ export default function AdminMetricas() {
       {errorMsg && <div className="auth-error-alert">{errorMsg}</div>}
 
       {loading ? (
-        <div style={{ padding: '32px', textAlign: 'center' }}>Cargando métricas…</div>
+        <div style={{ padding: '48px', textAlign: 'center', color: 'var(--md-sys-color-on-surface-variant)' }}>
+          Cargando métricas…
+        </div>
       ) : (
         <>
+          {/* ── M3 KPI Grid (Elevated Cards) ── */}
           <div className="kpi-grid">
             {stats.map((stat, i) => (
               <div key={i} className="kpi-card">
-                <div className="kpi-icon-wrapper">{stat.icon}</div>
+                <div className="kpi-icon-wrapper" aria-hidden="true">{stat.icon}</div>
                 <div className="kpi-details">
                   <span className="kpi-title">{stat.title}</span>
                   <h3 className="kpi-value">{stat.value}</h3>
@@ -200,7 +209,9 @@ export default function AdminMetricas() {
             ))}
           </div>
 
+          {/* ── M3 Metrics Layout ── */}
           <div className="metrics-layout">
+            {/* Columna Principal: Top Productos */}
             <div className="metrics-column main-col">
               <div className="section-header">
                 <h3>🔥 Más Populares en Campus</h3>
@@ -209,7 +220,7 @@ export default function AdminMetricas() {
 
               <div className="products-list">
                 {topProductos.length === 0 && (
-                  <p className="subtext" style={{ padding: '16px' }}>
+                  <p className="subtext" style={{ padding: '20px', background: 'var(--md-sys-color-surface-container-low)', borderRadius: 'var(--md-sys-shape-corner-large)' }}>
                     Sin pedidos entregados todavía en este periodo. En cuanto existan pedidos reales
                     (HU-03/HU-06), este ranking se llena solo.
                   </p>
@@ -231,6 +242,7 @@ export default function AdminMetricas() {
               </div>
             </div>
 
+            {/* Columna Lateral: Horas Pico & Notice */}
             <div className="metrics-column side-col">
               <div className="section-header">
                 <h3>⏰ Horas Pico de Pedidos (hoy)</h3>
@@ -256,8 +268,9 @@ export default function AdminMetricas() {
                 ))}
               </div>
 
+              {/* M3 Assist Notice Card */}
               <div className="notice-card">
-                <div className="notice-icon">💡</div>
+                <div className="notice-icon" aria-hidden="true">💡</div>
                 <div>
                   <strong className="notice-title">Estado del módulo</strong>
                   <p className="notice-desc">

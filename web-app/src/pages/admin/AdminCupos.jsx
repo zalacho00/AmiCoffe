@@ -250,14 +250,15 @@ export default function AdminCupos() {
       {aviso && (
         <div
           style={{
-            background: '#dcfce7',
-            border: '1px solid #bbf7d0',
-            color: '#166534',
-            padding: '10px 14px',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: 13,
-            fontWeight: 600,
-            marginBottom: 16,
+            background: 'var(--md-sys-color-success-container)',
+            border: '1px solid rgba(21, 128, 61, 0.25)',
+            color: 'var(--md-sys-color-on-success-container)',
+            padding: '12px 18px',
+            borderRadius: 'var(--md-sys-shape-corner-medium)',
+            fontSize: '13px',
+            fontWeight: 700,
+            marginBottom: '18px',
+            boxShadow: 'var(--md-sys-elevation-1)',
           }}
         >
           {aviso}
@@ -267,14 +268,15 @@ export default function AdminCupos() {
       {!configExiste && (
         <div
           style={{
-            background: '#fff7ed',
-            border: '1px solid #fdba74',
-            color: '#9a3412',
-            padding: '10px 14px',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: 13,
-            fontWeight: 600,
-            marginBottom: 16,
+            background: 'var(--md-sys-color-warning-container)',
+            border: '1px solid rgba(180, 83, 9, 0.25)',
+            color: 'var(--md-sys-color-on-warning-container)',
+            padding: '12px 18px',
+            borderRadius: 'var(--md-sys-shape-corner-medium)',
+            fontSize: '13px',
+            fontWeight: 700,
+            marginBottom: '18px',
+            boxShadow: 'var(--md-sys-elevation-1)',
           }}
         >
           ⚠️ Aún no hay configuración guardada: se muestran valores por defecto (cupo{' '}
@@ -283,7 +285,7 @@ export default function AdminCupos() {
         </div>
       )}
 
-      {/* Banner de Estado en Vivo (lo que verá el estudiante) */}
+      {/* ── M3 Banner de Estado en Vivo (Elevated Container) ── */}
       <div className="live-status-hero">
         <div className="live-status-main">
           <span className="live-badge-glow">🔴 EN VIVO</span>
@@ -298,6 +300,7 @@ export default function AdminCupos() {
                 key={t}
                 className={`time-btn ${config.tiempo_espera_estimado === t ? 'active' : ''}`}
                 onClick={() => cambiarEspera(t)}
+                title={`Fijar tiempo de espera en ${t} min`}
               >
                 ⏱️ {t} min
               </button>
@@ -308,11 +311,11 @@ export default function AdminCupos() {
 
       <div className="metrics-layout">
         <div className="metrics-column main-col">
-          {/* Configuración de Capacidad */}
+          {/* ── M3 Settings Card (Elevated Card) ── */}
           <div className="settings-card">
             <h3>⚙️ Parámetros de Operación</h3>
             {config.actualizado_por && (
-              <p className="subtext" style={{ marginTop: -8, marginBottom: 6 }}>
+              <p className="subtext" style={{ marginTop: -8, marginBottom: 8 }}>
                 Última actualización: {ultimaAct && `${ultimaAct} · `}{config.actualizado_por}
               </p>
             )}
@@ -327,6 +330,8 @@ export default function AdminCupos() {
                   onClick={() =>
                     setDraft((d) => ({ ...d, cupo_maximo: Math.max(1, (Number(d.cupo_maximo) || 0) - 1) }))
                   }
+                  title="Disminuir cupo"
+                  aria-label="Disminuir cupo"
                 >
                   -
                 </button>
@@ -343,16 +348,20 @@ export default function AdminCupos() {
                     textAlign: 'center',
                     border: 'none',
                     background: 'transparent',
-                    fontWeight: 700,
-                    fontSize: 13,
+                    fontWeight: 800,
+                    fontSize: 13.5,
                     outline: 'none',
+                    color: 'var(--md-sys-color-on-surface)',
                   }}
+                  aria-label="Cupo máximo"
                 />
                 <span>ped</span>
                 <button
                   onClick={() =>
                     setDraft((d) => ({ ...d, cupo_maximo: (Number(d.cupo_maximo) || 0) + 1 }))
                   }
+                  title="Aumentar cupo"
+                  aria-label="Aumentar cupo"
                 >
                   +
                 </button>
@@ -364,7 +373,7 @@ export default function AdminCupos() {
                 <strong>Duración de cada franja</strong>
                 <p className="subtext">Los pedidos se agrupan por franjas de este tamaño</p>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 10 }}>
                 {DURACIONES.map((m) => (
                   <button
                     key={m}
@@ -382,6 +391,7 @@ export default function AdminCupos() {
                 <strong>Agrupamiento Automático (Batching Barista)</strong>
                 <p className="subtext">Agrupa cafés iguales para optimizar tiempo de máquina de espresso</p>
               </div>
+              {/* M3 Switch */}
               <label className="toggle-switch">
                 <input
                   type="checkbox"
@@ -389,16 +399,19 @@ export default function AdminCupos() {
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, agrupamiento_automatico: e.target.checked }))
                   }
+                  aria-label="Agrupamiento automático"
                 />
                 <span className="slider round"></span>
               </label>
             </div>
 
             {dirty && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, paddingTop: 18, borderTop: '1px solid var(--md-sys-color-outline-variant)' }}>
+                {/* M3 Outlined Button */}
                 <button className="btn-audit" onClick={descartarCambios} disabled={guardando}>
                   Descartar
                 </button>
+                {/* M3 Filled Button */}
                 <button className="btn-primary" onClick={guardarParametros} disabled={guardando}>
                   {guardando ? 'Guardando…' : 'Guardar cambios'}
                 </button>
@@ -406,8 +419,8 @@ export default function AdminCupos() {
             )}
           </div>
 
-          {/* Franjas del día */}
-          <div className="section-header" style={{ marginTop: '24px' }}>
+          {/* ── Franjas del día ── */}
+          <div className="section-header" style={{ marginTop: '28px' }}>
             <h3>📅 Ocupación por Franjas Horarias</h3>
             <span className="subtext">Hoy · se actualiza en vivo</span>
           </div>
@@ -415,12 +428,13 @@ export default function AdminCupos() {
           {errorFranjas && <div className="auth-error-alert">{errorFranjas}</div>}
 
           {franjasUI.length === 0 && !errorFranjas && (
-            <p className="subtext">
+            <p className="subtext" style={{ padding: '16px', background: 'var(--md-sys-color-surface-container-low)', borderRadius: 'var(--md-sys-shape-corner-medium)' }}>
               Sin pedidos registrados hoy todavía. Las franjas aparecen aquí automáticamente a
               medida que entran pedidos.
             </p>
           )}
 
+          {/* M3 Slots Grid (Outlined Cards) */}
           <div className="slots-grid">
             {franjasUI.map((slot) => (
               <div key={slot.franja} className="slot-card">
@@ -444,7 +458,7 @@ export default function AdminCupos() {
           </div>
         </div>
 
-        {/* Panel lateral */}
+        {/* ── Panel lateral (M3 Assist Container) ── */}
         <div className="metrics-column side-col">
           <div className="info-box-green">
             <h4>💡 Cómo funciona el cupo</h4>

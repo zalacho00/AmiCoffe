@@ -87,7 +87,7 @@ function elapsedMinutes(ts) {
   return (Date.now() - date.getTime()) / 60000;
 }
 
-/* ─── Tarjeta individual ────────────────────────────────────── */
+/* ─── Tarjeta individual (M3 Elevated Card) ─────────────────── */
 function OrderCard({ pedido, onAdvance, onCancel, advancing }) {
   const elapsed = useElapsed(pedido.fecha_creacion);
   const mins = elapsedMinutes(pedido.fecha_creacion);
@@ -126,6 +126,7 @@ function OrderCard({ pedido, onAdvance, onCancel, advancing }) {
         ))}
       </ul>
 
+      {/* M3 Filled Button for Advance */}
       {BOTON_LABEL[pedido.estado] && (
         <button
           id={`advance-btn-${pedido.id}`}
@@ -134,19 +135,23 @@ function OrderCard({ pedido, onAdvance, onCancel, advancing }) {
           }`}
           onClick={() => onAdvance(pedido)}
           disabled={advancing === pedido.id}
+          aria-label={BOTON_LABEL[pedido.estado]}
         >
           {advancing === pedido.id ? (
             <span className="btn-spinner" />
           ) : (
-            <>{BOTON_LABEL[pedido.estado]} <span className="btn-arrow">→</span></>
+            <>{BOTON_LABEL[pedido.estado]} <span className="btn-arrow" aria-hidden="true">→</span></>
           )}
         </button>
       )}
-        <button
-          id={`cancel-btn-${pedido.id}`}
-          className="kds-btn-cancel"
-          onClick={() => onCancel(pedido)}
-          disabled={advancing === pedido.id}
+
+      {/* M3 Outlined Button for Cancel */}
+      <button
+        id={`cancel-btn-${pedido.id}`}
+        className="kds-btn-cancel"
+        onClick={() => onCancel(pedido)}
+        disabled={advancing === pedido.id}
+        aria-label={`Cancelar pedido ${pedido.codigo_retiro ?? ''}`}
       >
         Cancelar pedido
       </button>
@@ -169,7 +174,7 @@ export default function KdsPanel() {
   useEffect(() => {
     const q = query(
       collection(db, 'pedidos'),
-      where('estado', 'in', ESTADOS_ACTIVOS),  // ["en_espera", "en_preparacion"]
+      where('estado', 'in', ESTADOS_ACTIVOS),  // ["en_espera", "en_preparacion", "listo"]
       orderBy('fecha_creacion', 'asc')          // orden cronológico estable (fecha nunca se modifica)
     );
 
@@ -203,7 +208,7 @@ export default function KdsPanel() {
     return () => unsub();
   }, []);
 
-    /* ── HU-06: cambiar estado con transacción atómica (avanzar o cancelar) ── */
+  /* ── HU-06: cambiar estado con transacción atómica (avanzar o cancelar) ── */
   const cambiarEstado = useCallback(
     async (pedido, nuevoEstado) => {
       if (!nuevoEstado || advancing) return;
@@ -340,9 +345,9 @@ export default function KdsPanel() {
 
   return (
     <div className="kds-root">
-      {/* Barra de estado live */}
+      {/* ── M3 Barra de estado live (Elevated Surface Container) ── */}
       <div className="kds-statusbar">
-        <span className={`kds-live-dot ${liveOk ? 'live-ok' : 'live-err'}`} />
+        <span className={`kds-live-dot ${liveOk ? 'live-ok' : 'live-err'}`} aria-hidden="true" />
         <span className="kds-live-label">
           {liveOk ? 'Tiempo real · Firestore onSnapshot activo' : 'Sin conexión'}
         </span>
@@ -360,7 +365,7 @@ export default function KdsPanel() {
         <div className="kds-alert kds-alert--error" role="alert">
           <div>⚠️ {errorMsg}</div>
           {indexUrl && (
-            <div style={{ marginTop: '10px' }}>
+            <div style={{ marginTop: '12px' }}>
               <a
                 href={indexUrl}
                 target="_blank"
@@ -369,13 +374,14 @@ export default function KdsPanel() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '7px 14px',
-                  background: '#991b1b',
+                  padding: '8px 18px',
+                  background: 'var(--md-sys-color-error)',
                   color: '#ffffff',
-                  borderRadius: '6px',
+                  borderRadius: 'var(--md-sys-shape-corner-full)',
                   textDecoration: 'none',
                   fontWeight: '700',
-                  fontSize: '12.5px',
+                  fontSize: '13px',
+                  boxShadow: 'var(--md-sys-elevation-1)',
                 }}
               >
                 Crear índice compuesto en Firebase Console ↗
@@ -388,7 +394,7 @@ export default function KdsPanel() {
         <div className="kds-alert kds-alert--info" role="status">{avisoMsg}</div>
       )}
 
-      {/* Tablero kanban HU-05 */}
+      {/* ── M3 Tablero kanban HU-05 ── */}
       <div className="kds-board">
         {Object.entries(COL_META).map(([estado, meta]) => {
           const lista = grupos[estado] ?? [];
@@ -400,7 +406,7 @@ export default function KdsPanel() {
             >
               <div className="kds-col-header">
                 <div className="kds-col-title">
-                  <span className="kds-col-emoji">{meta.emoji}</span>
+                  <span className="kds-col-emoji" aria-hidden="true">{meta.emoji}</span>
                   <h3 className="kds-col-name">{meta.titulo}</h3>
                 </div>
                 <span className={`kds-col-count ${meta.badgeClass}`}>{lista.length}</span>
@@ -409,7 +415,7 @@ export default function KdsPanel() {
               <div className="kds-col-body">
                 {lista.length === 0 ? (
                   <div className="kds-empty">
-                    <span className="kds-empty-icon">✅</span>
+                    <span className="kds-empty-icon" aria-hidden="true">✅</span>
                     <p>Sin pedidos</p>
                   </div>
                 ) : (
@@ -429,7 +435,7 @@ export default function KdsPanel() {
         })}
       </div>
 
-      {/* Referencia técnica HU-05 */}
+      {/* ── M3 Nota técnica HU-05 ── */}
       <p className="kds-footnote">
         ★ HU-05 · Query:{' '}
         <code>where("estado","in",["en_espera","en_preparacion","listo"]) · orderBy("fecha_creacion","asc")</code>

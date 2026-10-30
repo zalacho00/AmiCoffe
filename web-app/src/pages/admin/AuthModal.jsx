@@ -56,17 +56,18 @@ export default function AuthModal({
 
   return (
     <div className="auth-overlay">
-      <div className="auth-card">
+      {/* ── M3 Dialog Container ── */}
+      <div className="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
         <div className="auth-header">
-          <div className="auth-logo-badge">
+          <div className="auth-logo-badge" aria-hidden="true">
             <img src="/amicoffe-logo.png" alt="AmiCoffe Logo" width="44" height="44" style={{ borderRadius: '50%', objectFit: 'contain' }} />
           </div>
-          <h2 className="auth-title">{title}</h2>
+          <h2 id="auth-modal-title" className="auth-title">{title}</h2>
           <span className="auth-subtitle">{subtitle}</span>
         </div>
 
         <div className="auth-body">
-          {error && <div className="auth-error-alert">{error}</div>}
+          {error && <div className="auth-error-alert" role="alert">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
@@ -78,6 +79,7 @@ export default function AuthModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -90,16 +92,17 @@ export default function AuthModal({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
 
-            <button type="submit" className="auth-submit-btn" disabled={isLoading}>
+            <button type="submit" className="auth-submit-btn" disabled={isLoading} aria-label="Ingresar al panel">
               {isLoading ? (
                 <span className="spinner">⏳ Conectando...</span>
               ) : (
                 <>
                   Ingresar
-                  <span className="btn-arrow">→</span>
+                  <span className="btn-arrow" aria-hidden="true">→</span>
                 </>
               )}
             </button>
